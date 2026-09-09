@@ -25,7 +25,7 @@ describe('BaseKitIconPicker', () => {
   })
 
   it('shows a placeholder label when no icon is set', () => {
-    expect(render('').text()).toContain('Symbol wählen')
+    expect(render('').text()).toContain('Choose icon')
   })
 
   it('has no free-text field for the icon name (picker only)', () => {
@@ -51,7 +51,7 @@ describe('BaseKitIconPicker', () => {
 
   it('clears the icon via the clear button', async () => {
     const w = render('i-lucide-home')
-    const clear = w.findAll('.u-btn').find(b => b.text() === 'Kein Symbol')!
+    const clear = w.findAll('.u-btn').find(b => b.text() === 'No icon')!
     await clear.trigger('click')
     expect(w.emitted('update:modelValue')!.at(-1)).toEqual([''])
   })

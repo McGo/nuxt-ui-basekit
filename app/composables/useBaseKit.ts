@@ -16,10 +16,14 @@ import { computed, inject, type ComputedRef, type InjectionKey } from 'vue'
  *   export default defineNuxtPlugin((nuxtApp) => {
  *     const config = computed(() => ({
  *       locale: 'de-DE',
- *       labels: { ...BASEKIT_DEFAULTS.labels, search: 'Suchen' },
+ *       labels: { ...BASEKIT_DEFAULTS.labels, search: 'Suchen', cancel: 'Abbrechen' },
  *     }))
  *     nuxtApp.vueApp.provide(baseKitKey, config)
  *   })
+ *
+ * Wer eine andere Sprache fährt, überschreibt die Tabelle vollständig — die
+ * Voreinstellung unten ist englisch und deckt nur den Fall ab, dass niemand
+ * etwas bereitstellt.
  *
  * Wer nichts bereitstellt, bekommt die Voreinstellungen unten. Wichtig, wenn
  * die Werte aus einer i18n-Bibliothek kommen: `useI18n()` verlangt einen
@@ -93,45 +97,46 @@ export interface BaseKitConfig {
 }
 
 /**
- * Voreinstellung: deutsch. Alle Projekte im Haus sind es, und eine Anwendung
- * mit mehreren Sprachen überschreibt die Tabelle ohnehin komplett.
+ * Voreinstellung: englisch. Das Paket weiß nicht, in welcher Sprache die
+ * Anwendung läuft, und Englisch ist die Sprache, die am wenigsten Leser
+ * ausschließt. Wer deutsch fährt, reicht `BASEKIT_DEFAULTS_DE` herein.
  */
 export const BASEKIT_DEFAULTS: BaseKitConfig = {
-  locale: 'de-DE',
+  locale: 'en-US',
   labels: {
-    search: 'Suchen',
-    all: 'Alle',
-    select: 'Auswählen',
-    change: 'Ändern',
-    edit: 'Bearbeiten',
-    cancel: 'Abbrechen',
-    confirm: 'Bestätigen',
-    confirmTitle: 'Sind Sie sicher?',
-    confirmBody: 'Diese Aktion lässt sich nicht rückgängig machen.',
-    empty: 'Noch nichts vorhanden',
-    noResults: 'Keine Treffer',
-    noResultsHint: 'Andere Schreibweise oder weniger Filter probieren.',
-    back: 'Zurück zur Übersicht',
-    view: 'Ansehen',
-    upload: 'Datei wählen',
-    perPage: 'pro Seite',
-    iconChoose: 'Symbol wählen',
-    iconEmpty: 'Kein Symbol gefunden',
-    iconClear: 'Kein Symbol',
-    chartAsTable: 'Als Tabelle',
-    chartAsChart: 'Als Diagramm',
-    paginationRange: ({ from, to, total }) => `${from}–${to} von ${total}`,
+    search: 'Search',
+    all: 'All',
+    select: 'Select',
+    change: 'Change',
+    edit: 'Edit',
+    cancel: 'Cancel',
+    confirm: 'Confirm',
+    confirmTitle: 'Are you sure?',
+    confirmBody: 'This action cannot be undone.',
+    empty: 'Nothing here yet',
+    noResults: 'No matches',
+    noResultsHint: 'Try a different spelling or fewer filters.',
+    back: 'Back to overview',
+    view: 'View',
+    upload: 'Choose file',
+    perPage: 'per page',
+    iconChoose: 'Choose icon',
+    iconEmpty: 'No icon found',
+    iconClear: 'No icon',
+    chartAsTable: 'As table',
+    chartAsChart: 'As chart',
+    paginationRange: ({ from, to, total }) => `${from}–${to} of ${total}`,
     markdown: {
-      bold: 'Fett',
-      italic: 'Kursiv',
-      h2: 'Überschrift 2',
-      h3: 'Überschrift 3',
-      bullet: 'Liste',
-      ordered: 'Nummerierte Liste',
-      quote: 'Zitat',
+      bold: 'Bold',
+      italic: 'Italic',
+      h2: 'Heading 2',
+      h3: 'Heading 3',
+      bullet: 'Bullet list',
+      ordered: 'Numbered list',
+      quote: 'Quote',
       code: 'Code',
       link: 'Link',
-      linkPrompt: 'Link-URL',
+      linkPrompt: 'Link URL',
     },
   },
 }
@@ -140,7 +145,7 @@ export const baseKitKey: InjectionKey<ComputedRef<BaseKitConfig>> = Symbol('base
 
 /**
  * Konfiguration für eine BaseKit-Komponente. Ohne bereitgestellten Wert
- * greifen die Voreinstellungen — die Komponente rendert dann auf Deutsch,
+ * greifen die Voreinstellungen — die Komponente rendert dann auf Englisch,
  * statt leere Beschriftungen zu zeigen.
  */
 export function useBaseKit(): ComputedRef<BaseKitConfig> {

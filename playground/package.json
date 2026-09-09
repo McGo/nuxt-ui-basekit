@@ -1,0 +1,18 @@
+{
+  "name": "nuxt-ui-basekit-playground",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "nuxt dev",
+    "build": "nuxt build",
+    "shots": "python3 ../scripts/shots.py"
+  },
+  "dependencies": {
+    "@nuxt/ui": "^4.7.1",
+    "@pinia/nuxt": "^1.0.2",
+    "nuxt": "^4.0.0",
+    "nuxt-ui-basekit": "file:..",
+    "pinia": "^4.0.3"
+  }
+}

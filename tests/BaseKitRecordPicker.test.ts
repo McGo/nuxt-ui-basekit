@@ -34,14 +34,14 @@ function listRows(w: ReturnType<typeof render>) {
 
 describe('BaseKitRecordPicker', () => {
   it('shows a "select" trigger when nothing is selected', () => {
-    expect(render(null).text()).toContain('Auswählen')
+    expect(render(null).text()).toContain('Select')
   })
 
   it('shows the title with an edit link + "change" when selected', () => {
     const w = render(2)
     expect(w.text()).toContain('Angebote')
     expect(w.find('a[href="/admin/spaces/2"]').exists()).toBe(true)
-    expect(w.text()).toContain('Ändern')
+    expect(w.text()).toContain('Change')
   })
 
   it('emits the chosen record from the modal list', async () => {

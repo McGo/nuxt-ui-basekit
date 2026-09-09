@@ -22,7 +22,7 @@ describe('BaseKitBackLink', () => {
   it('says where it goes in direction, not by naming the list', () => {
     // Fest verdrahtet: wer zwischen Bereichen wechselt, soll den Rücksprung
     // nicht jedes Mal an einer anderen Beschriftung erkennen müssen.
-    expect(render().text()).toBe('Zurück zur Übersicht')
+    expect(render().text()).toBe('Back to overview')
   })
 
   it('carries the arrow so it reads as a way back at a glance', () => {

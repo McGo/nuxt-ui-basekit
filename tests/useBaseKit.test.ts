@@ -32,7 +32,7 @@ describe('useBaseKit', () => {
       global: { stubs: { NuxtLink: { template: '<a><slot /></a>' }, UIcon: true } },
     })
 
-    expect(w.text()).toBe('Zurück zur Übersicht')
+    expect(w.text()).toBe('Back to overview')
   })
 
   it('nimmt die Beschriftungen der Anwendung, wenn sie welche bereitstellt', () => {
@@ -91,6 +91,6 @@ describe('useBaseKit', () => {
     }
 
     expect(BASEKIT_DEFAULTS.labels.paginationRange({ from: 1, to: 25, total: 300 }))
-      .toBe('1–25 von 300')
+      .toBe('1–25 of 300')
   })
 })

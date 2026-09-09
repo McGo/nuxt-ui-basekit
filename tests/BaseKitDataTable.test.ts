@@ -92,7 +92,7 @@ describe('BaseKitDataTable', () => {
     const w = render()
     await w.find('.u-input').setValue('zzz')
     expect(w.find('tbody').exists()).toBe(false)
-    expect(w.text()).toContain('Keine Treffer')
+    expect(w.text()).toContain('No matches')
   })
 
   it('emits create when the create button is clicked', async () => {

@@ -1,14 +1,16 @@
 # nuxt-ui-basekit
 
-Basis-Komponenten für Nuxt 4 auf [Nuxt UI](https://ui.nuxt.com) — als Nuxt-Layer.
-Tabellen, Reiter, Diagramme, Auswahl-Dialoge, Leerzustände: die Bausteine, die
-in jedem Verwaltungs-Frontend wieder anfallen und die Nuxt UI nicht mitbringt.
+Base components for Nuxt 4 on top of [Nuxt UI](https://ui.nuxt.com) — as a Nuxt
+layer. Tables, tabs, charts, pickers, empty states: the parts that come up again
+in every admin frontend and that Nuxt UI does not ship.
 
-Das Paket kennt keine Anwendung. Es hat keine Stores außer einem für die
-Rückfrage, keine Endpunkte, keine Übersetzungsschlüssel und keine Farben, die
-zu einer Marke gehören. Was es anzeigt, bekommt es hereingereicht.
+The package knows nothing about your application. It has no stores beyond the
+one behind the confirmation dialog, no endpoints, no translation keys and no
+colours that belong to a brand. Whatever it displays is handed in.
 
-## Einbinden
+**[→ Every component with a screenshot](https://github.com/McGo/nuxt-ui-basekit/blob/main/COMPONENTS.md)**
+
+## Install
 
 ```bash
 npm i -D nuxt-ui-basekit
@@ -21,30 +23,39 @@ export default defineNuxtConfig({
 })
 ```
 
-`@nuxt/ui`, `nuxt` und `pinia` sind Peers, sie stehen im Konsumenten und
-werden nicht mitgeliefert. Die Komponenten sind danach global verfügbar, ohne
-Import.
+`@nuxt/ui`, `nuxt` and `pinia` are peers — they live in the consumer and are not
+bundled along. The components are globally available afterwards, no import.
 
-## Was drin ist
+Nuxt UI itself still needs its stylesheet, the same as in any project that uses
+it:
 
-| Gruppe | Komponenten |
+```css
+/* app/assets/css/main.css, referenced from nuxt.config.ts */
+@import "tailwindcss";
+@import "@nuxt/ui";
+```
+
+## What is in it
+
+| Group | Components |
 |---|---|
-| Struktur | `BaseKitTabs` · `BaseKitSettingRow` · `BaseKitEmptyState` · `BaseKitChoiceCard` · `BaseKitPending` |
-| Listen | `BaseKitDataTable` · `BaseKitStatTile` |
-| Auswahl | `BaseKitRecordPicker` · `BaseKitIconPicker` · `BaseKitFileUpload` |
-| Wege | `BaseKitBackLink` · `BaseKitViewLink` |
-| Rückfrage | `BaseKitConfirmModal` + `useConfirm()` |
+| Structure | `BaseKitTabs` · `BaseKitSettingRow` · `BaseKitEmptyState` · `BaseKitChoiceCard` · `BaseKitPending` |
+| Lists | `BaseKitDataTable` · `BaseKitStatTile` |
+| Pickers | `BaseKitRecordPicker` · `BaseKitIconPicker` · `BaseKitFileUpload` |
+| Navigation | `BaseKitBackLink` · `BaseKitViewLink` |
+| Confirmation | `BaseKitConfirmModal` + `useConfirm()` |
 | Text | `BaseKitMarkdownEditor` |
-| Diagramme | `BaseKitChartBars` · `-Columns` · `-Donut` · `-Meter` · `-Figure` |
+| Charts | `BaseKitChartBars` · `-Columns` · `-Donut` · `-Meter` · `-Figure` |
 
-Jede Komponente trägt ihre Erklärung im Kopf der Datei — was sie tut, wann sie
-die richtige Wahl ist und wann nicht.
+Each component carries its reasoning in the file header — what it does, when it
+is the right choice and when it is not. [COMPONENTS.md](https://github.com/McGo/nuxt-ui-basekit/blob/main/COMPONENTS.md) has the
+short version of each, with a screenshot.
 
-## Beschriftungen und Sprache
+## Labels and language
 
-Die Komponenten rufen kein `vue-i18n` auf und kennen keine
-Übersetzungsschlüssel. Ohne Zutun rendern sie deutsche Voreinstellungen; wer
-eigene Texte oder mehrere Sprachen führt, reicht sie über ein Plugin herein:
+The components never call `vue-i18n` and know no translation keys. Left alone
+they render English defaults; anyone with their own wording or several
+languages hands them in through a plugin:
 
 ```ts
 // plugins/basekit.ts
@@ -65,95 +76,98 @@ export default defineNuxtPlugin((nuxtApp) => {
 })
 ```
 
-Zwei Dinge, die dabei Zeit kosten können:
+`locale` is a BCP-47 tag and drives `Intl` — thousands separators, percentages
+and date formats in the charts follow it.
 
-- **`useI18n()` gehört nicht ins Plugin.** Es verlangt einen
-  Komponenten-Setup-Kontext und wirft dort `MUST_BE_CALL_SETUP_TOP`
-  (Fehlercode 26). Beim serverseitigen Rendern heißt das: 500 auf jeder Seite.
-  Die Instanz kommt über `nuxtApp.$i18n`, und zwar erst beim Lesen des
-  `computed` — dann ist auch die Plugin-Reihenfolge gleichgültig.
-- **Einzelne Beschriftungen** bleiben als Prop überschreibbar. Die Tabelle
-  trägt nur, was ohne Angabe herauskommt.
+Two things that can cost an afternoon:
 
-## Farben
+- **`useI18n()` does not belong in the plugin.** It requires a component setup
+  context and throws `MUST_BE_CALL_SETUP_TOP` (error 26) there. Under server-side
+  rendering that means a 500 on every page. Take the instance from
+  `nuxtApp.$i18n`, and only when the `computed` is read — then plugin order
+  stops mattering too.
+- **Individual labels stay overridable as props.** The table above only decides
+  what comes out when nothing is passed.
 
-Die Komponenten greifen ausschließlich auf `--basekit-*` zu. Die
-Voreinstellungen stehen in `app/assets/css/basekit.css` und werden vom Layer
-geladen. Ein Projekt mit eigenem Theme legt sie in seinem eigenen Stylesheet
-darauf:
+## Colours
+
+The components only ever reach for `--basekit-*`. The defaults live in
+`app/assets/css/basekit.css` and are loaded by the layer. A project with its own
+theme puts its values on top, in its own stylesheet:
 
 ```css
 :root {
-  --basekit-accent: var(--meine-markenfarbe, #2563eb);
-  --basekit-surface: var(--meine-kartenflaeche, #ffffff);
+  --basekit-accent: var(--my-brand-colour, #2563eb);
+  --basekit-surface: var(--my-card-surface, #ffffff);
 }
 ```
 
-Die fünf Diagrammfarben sind als Satz geprüft — Lichtheitsband, Chroma und
-Abstand zwischen Nachbarn, auch unter Farbfehlsichtigkeit. Wer sie
-überschreibt, sollte das als Satz tun und nicht einzeln; wer mehr als fünf
-Reihen hat, fasst zusammen, statt eine sechste Farbe zu erfinden.
+The five chart colours are validated as a set — lightness band, chroma and the
+distance between neighbours, colour vision deficiency included. Override them as
+a set rather than one at a time; if you have more than five series, group them
+instead of inventing a sixth colour.
 
-## Entwickeln
+## Development
 
 ```bash
 npm install
-npx nuxi prepare     # erzeugt .nuxt/tsconfig.json, sonst laufen die Tests nicht
+npx nuxi prepare     # writes .nuxt/tsconfig.json, without it the tests fail
 npm test
 npm run lint         # nuxi typecheck
 ```
 
-`tests/grenze.test.ts` hält fest, was das Paket nicht darf: keine Importe
-außerhalb des Pakets, keine Abhängigkeit, die nicht in der `package.json`
-steht, kein `vue-i18n`, keine Übersetzungsschlüssel, keine fremden
-CSS-Variablen. Der Test ist der Grund, warum sich das Paket überhaupt
-herausschneiden ließ — ohne ihn wäre die Trennung nach dem dritten Feature
-wieder zu.
+`tests/grenze.test.ts` pins down what the package is not allowed to do: no
+imports from outside the package, no dependency that is missing from
+`package.json`, no `vue-i18n`, no translation keys, no foreign CSS variables.
+That test is the reason the package could be carved out at all — without it the
+separation would have closed up again by the third feature.
+
+`playground/` is a small Nuxt app that pulls the layer in the way a consumer
+would. It is the place to look at a component, and the source of the
+screenshots in [COMPONENTS.md](https://github.com/McGo/nuxt-ui-basekit/blob/main/COMPONENTS.md):
+
+```bash
+cd playground && npm install && npm run dev
+```
 
 ### Lockfile
 
-Wer auf macOS oder Windows eine Abhängigkeit hinzufügt, muss das Lockfile
-anschließend einmal unter Linux/x64 nachziehen — sonst fehlen die
-plattformspezifischen Optional-Pakete (`@emnapi/*` und Verwandtschaft), und
-`npm ci` im Workflow bricht ab:
+Adding a dependency on macOS or Windows means pulling the lockfile through
+Linux/x64 afterwards — otherwise the platform-specific optional packages
+(`@emnapi/*` and relatives) are missing and `npm ci` fails in the workflow:
 
 ```bash
 docker run --rm --platform linux/amd64 -v "$PWD:/app" -w /app \
   node:24 npm install --package-lock-only
 ```
 
-Die Architektur ist nicht gleichgültig: auf Apple Silicon läuft der Container
-ohne `--platform` als arm64, und dann fehlen genau die x64-Varianten, die der
-Runner braucht. Danach lokal einmal `npm ci`, das holt die eigenen Binaries
-zurück.
+The architecture matters: on Apple Silicon the container runs as arm64 without
+`--platform`, and then exactly the x64 variants the runner needs are still
+missing. Run `npm ci` locally afterwards to get your own binaries back.
 
-## Veröffentlichen
+## Releasing
 
-Zwei Workflows unter `.github/workflows`. `pruefen` läuft auf `main` und in
-jedem Pull Request und führt `nuxi prepare`, `nuxi typecheck` und die Tests
-aus. `veroeffentlichen` hängt an einem Tag `vX.Y.Z`, prüft noch einmal und
-schiebt das Paket dann nach npmjs.com. Ein Build-Schritt fehlt, weil der Layer
-als Rohquelle ausgeliefert wird und Nuxt ihn im Konsumenten übersetzt.
-
-Eine neue Fassung:
+Two workflows under `.github/workflows`. `pruefen` runs on `main` and on every
+pull request and does `nuxi prepare`, `nuxi typecheck` and the tests.
+`veroeffentlichen` hangs off a `vX.Y.Z` tag, checks again and publishes to
+npmjs.com. There is no build step: the layer ships as raw source and Nuxt
+compiles it in the consumer.
 
 ```bash
-npm version patch        # hebt die package.json und setzt den Tag
+npm version patch        # bumps package.json and sets the tag
 git push --follow-tags
 ```
 
-Der Job vergleicht den Tag mit der Zahl in der `package.json` und bricht ab,
-wenn die beiden auseinanderlaufen. Veröffentlicht wird mit `--provenance`:
-auf npmjs steht dann nachprüfbar, aus welchem Commit das Paket stammt.
+The job compares the tag against the number in `package.json` and stops if they
+disagree. Publishing runs over OIDC through npm's trusted publishing — no token
+in the repository — and with `--provenance`, so npmjs records which commit the
+package was built from.
 
-Dafür braucht das Repo ein Secret `NPM_TOKEN` — ein Automation-Token aus dem
-npm-Konto, einzutragen unter *Settings → Secrets and variables → Actions*.
+## Origin
 
-## Herkunft
+Grown inside an admin frontend and in use there for months before it became a
+package of its own.
 
-Entstanden in einem Verwaltungs-Frontend und dort über Monate in Gebrauch,
-bevor es hier ein eigenes Paket wurde.
+## License
 
-## Lizenz
-
-MIT — siehe [LICENSE](LICENSE).
+MIT — see [LICENSE](LICENSE).

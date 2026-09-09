@@ -1,0 +1,5 @@
+/* Nuxt UI bringt Tailwind nicht von selbst mit — diese beiden Zeilen muss
+   jedes Projekt anlegen, das @nuxt/ui einsetzt. Der BaseKit-Layer lädt darüber
+   hinaus nur seine eigenen --basekit-*-Token. */
+@import "tailwindcss";
+@import "@nuxt/ui";

@@ -23,7 +23,7 @@ describe('BaseKitViewLink', () => {
     // Fest verdrahtet wie beim Rücksprung: wer zwischen Bereichen wechselt,
     // soll den Weg zur Ansicht nicht jedes Mal an einer anderen Beschriftung
     // erkennen müssen.
-    expect(render().text()).toBe('Ansehen')
+    expect(render().text()).toBe('View')
   })
 
   it('öffnet in einem neuen Reiter, damit nichts Ungespeichertes verlorengeht', () => {

@@ -19,20 +19,20 @@ describe('useChartFormat', () => {
   const { number, compact, percent, bytes, duration } = useChartFormat()
 
   it('groups thousands in the active locale', () => {
-    expect(number(12345)).toBe('12.345')
+    expect(number(12345)).toBe('12,345')
   })
 
   it('shortens only from five digits up', () => {
-    expect(compact(9999)).toBe('9.999')
+    expect(compact(9999)).toBe('9,999')
     expect(compact(12400)).toContain('12')
   })
 
   it('formats a share and only says 100 % when it really is', () => {
-    expect(percent(1, 2)).toBe('50\u00A0%')
-    expect(percent(5, 5)).toBe('100\u00A0%')
+    expect(percent(1, 2)).toBe('50%')
+    expect(percent(5, 5)).toBe('100%')
     // 99,99 % darf nicht auf 100 % aufgerundet werden — die eine fehlende
     // Übersetzung wäre sonst unsichtbar.
-    expect(percent(9999, 10000)).toBe('99,9\u00A0%')
+    expect(percent(9999, 10000)).toBe('99.9%')
   })
 
   it('returns a dash instead of dividing by zero', () => {
@@ -42,8 +42,8 @@ describe('useChartFormat', () => {
   it('uses decimal prefixes, the way storage is billed', () => {
     expect(bytes(0)).toBe('0 B')
     expect(bytes(999)).toBe('999 B')
-    expect(bytes(1500)).toBe('1,5 kB')
-    expect(bytes(2_500_000_000)).toBe('2,5 GB')
+    expect(bytes(1500)).toBe('1.5 kB')
+    expect(bytes(2_500_000_000)).toBe('2.5 GB')
   })
 
   it('formats runtime as hours and minutes', () => {
