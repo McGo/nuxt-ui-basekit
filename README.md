@@ -110,6 +110,23 @@ CSS-Variablen. Der Test ist der Grund, warum sich das Paket überhaupt
 herausschneiden ließ — ohne ihn wäre die Trennung nach dem dritten Feature
 wieder zu.
 
+### Lockfile
+
+Wer auf macOS oder Windows eine Abhängigkeit hinzufügt, muss das Lockfile
+anschließend einmal unter Linux/x64 nachziehen — sonst fehlen die
+plattformspezifischen Optional-Pakete (`@emnapi/*` und Verwandtschaft), und
+`npm ci` im Workflow bricht ab:
+
+```bash
+docker run --rm --platform linux/amd64 -v "$PWD:/app" -w /app \
+  node:24 npm install --package-lock-only
+```
+
+Die Architektur ist nicht gleichgültig: auf Apple Silicon läuft der Container
+ohne `--platform` als arm64, und dann fehlen genau die x64-Varianten, die der
+Runner braucht. Danach lokal einmal `npm ci`, das holt die eigenen Binaries
+zurück.
+
 ## Veröffentlichen
 
 Zwei Workflows unter `.github/workflows`. `pruefen` läuft auf `main` und in
