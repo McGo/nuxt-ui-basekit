@@ -1,14 +1,14 @@
 <script setup lang="ts">
 /**
- * Ring für Teil-vom-Ganzen bei wenigen Klassen.
+ * A ring for part-of-whole across a few classes.
  *
- * Bewusst eng eingesetzt: ein Ring beantwortet „wie verteilt sich das grob",
- * nicht „welcher von zweien ist größer". Sobald zwei Segmente nahe beieinander
- * liegen, ist ein Balken die ehrlichere Form. Höchstens vier Segmente, sonst
- * verlieren die kleinen ihre Beschriftung.
+ * Deliberately narrow in scope: a ring answers "roughly how does this split",
+ * not "which of these two is bigger". As soon as two segments sit close
+ * together, a bar is the more honest shape. Four segments at most, otherwise
+ * the small ones lose their labels.
  *
- * In der Mitte steht die Summe — das ist die Zahl, die zuerst gesucht wird,
- * und sie füllt den Platz, den ein Ring ohnehin frei lässt.
+ * The total goes in the middle — it is the number people look for first, and
+ * it fills the space a ring leaves empty anyway.
  */
 import { computed, ref } from 'vue'
 import { baseKitChartColor, useChartFormat } from '../../composables/useChartPalette'
@@ -21,7 +21,7 @@ interface DonutSlice {
 
 const props = withDefaults(defineProps<{
   slices: DonutSlice[]
-  /** Beschriftung unter der Summe in der Mitte. */
+  /** Label below the total in the centre. */
   centerLabel?: string
   size?: number
   ariaLabel?: string
@@ -34,7 +34,7 @@ const props = withDefaults(defineProps<{
 const { number, percent } = useChartFormat()
 
 const THICKNESS = 18
-/** Lücke zwischen den Segmenten, in Grad — das Gegenstück zur 2-px-Lücke. */
+/** Gap between segments, in degrees — the counterpart to the 2px gap. */
 const GAP_DEGREES = 2
 
 const active = ref<string | null>(null)
@@ -61,8 +61,8 @@ const arcs = computed(() => {
       const start = cursor
       cursor += sweep
 
-      // Ein Segment, das den ganzen Kreis füllt, hätte identischen Start- und
-      // Endpunkt — der Bogen verschwände. Dann zeichnen wir den vollen Ring.
+      // A segment filling the whole circle would have identical start and end
+      // points and the arc would vanish. Draw the full ring instead.
       const full = sweep >= 359.9
       const gap = full ? 0 : Math.min(GAP_DEGREES, sweep / 3)
       const from = start + gap / 2
@@ -95,10 +95,10 @@ const legend = computed(() =>
 </script>
 
 <template>
-  <!-- Legende unter dem Ring, nicht daneben: die Karte steht auf der
-       Übersicht in einer schmalen Spalte, und nebeneinander blieb für die
-       Beschriftungen so wenig übrig, dass „Ausgeschieden" auf ein „A"
-       zusammenschrumpfte. Untereinander hat jede Zeile die volle Breite. -->
+  <!-- Legend below the ring, not beside it: the card often sits in a narrow
+       column, and side by side so little was left for the labels that a word
+       like "Discontinued" shrank to a "D". Stacked, every row has the full
+       width. -->
   <div class="flex flex-col items-center gap-5">
     <svg
       :width="props.size"
@@ -108,8 +108,8 @@ const legend = computed(() =>
       :aria-label="props.ariaLabel"
       class="shrink-0"
     >
-      <!-- Leerer Ring, wenn nichts da ist: die Form bleibt erkennbar, statt
-           dass die Karte auf eine leere Fläche zusammenfällt. -->
+      <!-- An empty ring when there is nothing: the shape stays recognisable
+           instead of the card collapsing into a blank area. -->
       <circle
         v-if="!arcs.length"
         :cx="center"
@@ -156,7 +156,7 @@ const legend = computed(() =>
       >{{ props.centerLabel }}</text>
     </svg>
 
-    <!-- Legende trägt die Identität, nicht die Farbe allein. -->
+    <!-- The legend carries the identity, not the colour alone. -->
     <ul class="w-full space-y-1.5">
       <li
         v-for="entry in legend"

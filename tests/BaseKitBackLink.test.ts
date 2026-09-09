@@ -20,8 +20,8 @@ describe('BaseKitBackLink', () => {
   })
 
   it('says where it goes in direction, not by naming the list', () => {
-    // Fest verdrahtet: wer zwischen Bereichen wechselt, soll den Rücksprung
-    // nicht jedes Mal an einer anderen Beschriftung erkennen müssen.
+    // Hard-wired: anyone moving between areas should not have to recognise
+    // the way back by a different label each time.
     expect(render().text()).toBe('Back to overview')
   })
 

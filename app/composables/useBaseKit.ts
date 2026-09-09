@@ -1,16 +1,15 @@
 import { computed, inject, type ComputedRef, type InjectionKey } from 'vue'
 
 /**
- * Der einzige Draht zwischen den BaseKit-Komponenten und der Anwendung,
- * die sie einsetzt.
+ * The only wire between the BaseKit components and the application using them.
  *
- * Die Komponenten sollen in jedem Nuxt-Projekt laufen. Sie dürfen deshalb
- * weder `vue-i18n` aufrufen noch Übersetzungsschlüssel kennen: `t('common.search')`
- * gibt es nur in der einen Anwendung, die diesen Schlüssel führt, und ein
- * Paket, das solche Schlüssel voraussetzt, ist keins.
+ * The components are meant to run in any Nuxt project. That rules out calling
+ * `vue-i18n` and it rules out knowing translation keys: `t('common.search')`
+ * exists only in the one application that carries that key, and a package
+ * which presupposes such keys is not a package.
  *
- * Stattdessen reicht die Anwendung Sprache und Beschriftungen einmal herein —
- * in einem Plugin, das die Werte aus ihrer eigenen Quelle zieht:
+ * Instead the application hands language and labels in once, from a plugin
+ * that pulls the values out of its own source:
  *
  *   // plugins/basekit.ts
  *   export default defineNuxtPlugin((nuxtApp) => {
@@ -21,39 +20,35 @@ import { computed, inject, type ComputedRef, type InjectionKey } from 'vue'
  *     nuxtApp.vueApp.provide(baseKitKey, config)
  *   })
  *
- * Wer eine andere Sprache fährt, überschreibt die Tabelle vollständig — die
- * Voreinstellung unten ist englisch und deckt nur den Fall ab, dass niemand
- * etwas bereitstellt.
+ * Provide nothing and the defaults below apply. One thing worth knowing when
+ * the values come from an i18n library: `useI18n()` requires a component setup
+ * context and throws inside a plugin. Take the instance from `nuxtApp.$i18n`,
+ * and only when the `computed` is read.
  *
- * Wer nichts bereitstellt, bekommt die Voreinstellungen unten. Wichtig, wenn
- * die Werte aus einer i18n-Bibliothek kommen: `useI18n()` verlangt einen
- * Komponenten-Setup-Kontext und wirft im Plugin. Die Instanz gehört über
- * `nuxtApp.$i18n` geholt, und zwar erst beim Lesen des `computed`.
+ * Over `provide`/`inject` rather than `useNuxtApp()`: that way the components
+ * also run in a Vitest mount without a Nuxt context, and two requests share
+ * nothing under SSR.
  *
- * Über `provide`/`inject`, nicht über `useNuxtApp()`: so laufen die
- * Komponenten auch in einem Vitest-Mount ohne Nuxt-Kontext, und unter SSR
- * teilen sich zwei Anfragen nichts.
- *
- * Einzelne Beschriftungen bleiben weiterhin als Prop überschreibbar — hier
- * steht nur, was ohne Zutun herauskommt.
+ * Individual labels stay overridable as props — what follows only decides what
+ * comes out when nothing is passed.
  */
 export interface BaseKitLabels {
-  /** Suchfeld über Listen und Auswahl-Dialogen. */
+  /** Search field above lists and pickers. */
   search: string
-  /** Filter-Eintrag „ohne Einschränkung". */
+  /** Filter entry for "no restriction". */
   all: string
   select: string
   change: string
   edit: string
   cancel: string
   confirm: string
-  /** Überschrift der Rückfrage, wenn der Aufrufer keine mitgibt. */
+  /** Heading of the confirmation when the caller passes none. */
   confirmTitle: string
-  /** Text der Rückfrage, wenn der Aufrufer keinen mitgibt. */
+  /** Body of the confirmation when the caller passes none. */
   confirmBody: string
-  /** Leere Liste — es gibt noch nichts. */
+  /** Empty list — nothing exists yet. */
   empty: string
-  /** Leere Liste — die Suche greift, findet aber nichts. */
+  /** Empty list — the search ran and found nothing. */
   noResults: string
   noResultsHint: string
   back: string
@@ -62,15 +57,15 @@ export interface BaseKitLabels {
   perPage: string
   iconChoose: string
   iconEmpty: string
-  /** Auswahl aufheben — im Symbolwähler die leere Wahl. */
+  /** Clearing the choice — the empty option in the icon picker. */
   iconClear: string
   chartAsTable: string
   chartAsChart: string
-  /** „1–25 von 300" — als Funktion, weil die Zahlen mitten im Satz stehen. */
+  /** "1–25 of 300" — a function, because the numbers sit inside the sentence. */
   paginationRange: (range: { from: number, to: number, total: number }) => string
   /**
-   * Werkzeugleiste des Markdown-Editors. Eigene Gruppe, weil die Begriffe nur
-   * dort vorkommen und die obere Ebene sonst zur Hälfte aus ihnen bestünde.
+   * Toolbar of the Markdown editor. Its own group, because the terms occur
+   * nowhere else and the top level would otherwise be half made of them.
    */
   markdown: {
     bold: string
@@ -82,24 +77,24 @@ export interface BaseKitLabels {
     quote: string
     code: string
     link: string
-    /** Abfrage beim Setzen eines Links. */
+    /** Prompt shown when setting a link. */
     linkPrompt: string
   }
 }
 
 export interface BaseKitConfig {
   /**
-   * BCP-47-Kennung für `Intl` — steuert Tausendertrennung, Prozent- und
-   * Datumsformate in den Diagrammen.
+   * BCP-47 tag for `Intl` — drives thousands separators, percentages and date
+   * formats in the charts.
    */
   locale: string
   labels: BaseKitLabels
 }
 
 /**
- * Voreinstellung: englisch. Das Paket weiß nicht, in welcher Sprache die
- * Anwendung läuft, und Englisch ist die Sprache, die am wenigsten Leser
- * ausschließt. Wer deutsch fährt, reicht `BASEKIT_DEFAULTS_DE` herein.
+ * Defaults: English. The package cannot know what language the application
+ * runs in, and English is the one that shuts out the fewest readers. Anything
+ * else is handed in through the plugin above.
  */
 export const BASEKIT_DEFAULTS: BaseKitConfig = {
   locale: 'en-US',
@@ -144,16 +139,16 @@ export const BASEKIT_DEFAULTS: BaseKitConfig = {
 export const baseKitKey: InjectionKey<ComputedRef<BaseKitConfig>> = Symbol('basekit')
 
 /**
- * Konfiguration für eine BaseKit-Komponente. Ohne bereitgestellten Wert
- * greifen die Voreinstellungen — die Komponente rendert dann auf Englisch,
- * statt leere Beschriftungen zu zeigen.
+ * Configuration for a BaseKit component. With nothing provided the defaults
+ * apply — the component then renders in English instead of showing empty
+ * labels.
  */
 export function useBaseKit(): ComputedRef<BaseKitConfig> {
   const provided = inject(baseKitKey, null)
   return provided ?? computed(() => BASEKIT_DEFAULTS)
 }
 
-/** Kurzform für den häufigen Fall, dass nur die Beschriftungen gebraucht werden. */
+/** Short form for the common case of only needing the labels. */
 export function useBaseKitLabels(): ComputedRef<BaseKitLabels> {
   const config = useBaseKit()
   return computed(() => config.value.labels)

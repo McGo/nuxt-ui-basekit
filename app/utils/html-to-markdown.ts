@@ -1,14 +1,12 @@
 /**
- * HTML → Markdown (turndown). Zwei Einsätze, beide nur im Admin/Editor — daher
- * bewusst getrennt von `markdown.ts` (das im öffentlichen Widget-Bundle steckt
- * und turndown nicht mitziehen soll):
- *   - Tiptap speichert HTML → hier nach Markdown serialisieren.
- *   - Legacy-Text-Blöcke mit rohem `config.html` einmalig nach Markdown wandeln.
+ * HTML to Markdown, through turndown. Kept apart from `markdown.ts` on
+ * purpose: that one may end up in a public bundle and should not drag turndown
+ * along, while this one is only ever needed where something is edited.
  *
- * **turndown wird bewusst erst beim ersten Aufruf geladen.** Das Paket ist
- * CommonJS; ein Import auf Modulebene landet im Server-Bundle und wirft dort
- * beim Rendern „require is not defined in ES module scope". Der Editor läuft
- * ohnehin nur im Browser — auf dem Server wird die Funktion nie aufgerufen.
+ * **turndown is loaded lazily, and that is deliberate.** The package is
+ * CommonJS; an import at module level lands in the server bundle and throws
+ * "require is not defined in ES module scope" while rendering. The editor runs
+ * in the browser anyway — on the server this function is never called.
  */
 type Turndown = { turndown: (html: string) => string }
 
@@ -18,14 +16,14 @@ function service(): Turndown | null {
   if (instance) return instance
   if (import.meta.server) return null
 
-  // Synchroner Zugriff auf ein bereits geladenes Modul: der Editor ruft
-  // `prepare()` beim Einhängen auf, bevor gespeichert werden kann.
+  // Synchronous access to an already loaded module: the editor calls
+  // `prepare()` on mount, well before anything can be saved.
   return instance
 }
 
 /**
- * Lädt turndown im Browser vor. Die Editor-Komponenten rufen das beim
- * Einhängen auf, damit {@link htmlToMarkdown} danach synchron bleiben kann.
+ * Preloads turndown in the browser. The editor components call this on mount
+ * so {@link htmlToMarkdown} can stay synchronous afterwards.
  */
 export async function prepareHtmlToMarkdown(): Promise<void> {
   if (instance || import.meta.server) return
@@ -40,8 +38,8 @@ export async function prepareHtmlToMarkdown(): Promise<void> {
 export function htmlToMarkdown(html?: string | null): string {
   if (!html) return ''
   const td = service()
-  // Ohne geladenes turndown (Server, oder prepare() vergessen) lieber das
-  // Original zurückgeben als eine Ausnahme zu werfen — der Text ginge sonst
-  // beim Speichern verloren.
+  // Without turndown loaded — on the server, or when prepare() was forgotten
+  // — return the original rather than throwing: the text would otherwise be
+  // lost on save.
   return td ? td.turndown(String(html)).trim() : String(html)
 }

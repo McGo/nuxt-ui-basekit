@@ -3,32 +3,32 @@ import { computed, ref } from 'vue'
 import { useBaseKitLabels } from '../composables/useBaseKit'
 
 /**
- * Auswahl eines Datensatzes über (potenziell mehrere) Modelle — die Auswahl
- * läuft in einem Modal, das per „Auswählen" / „Ändern" aufgeht. Im Modal ist
- * die Liste nach Text UND Typ filterbar.
+ * Picks a record across one or several models. The choosing happens in a modal
+ * that opens through "Select" or "Change"; inside, the list filters by text
+ * AND by type.
  *
- * - **Nichts gewählt** → Button „Auswählen".
- * - **Gewählt** → Titel der Auswahl (Link zum Bearbeiten des Inhalts) + Typ-
- *   Badge + Button „Ändern".
+ * - **Nothing selected** — a "Select" button.
+ * - **Selected** — the title of the choice, linking to its edit form, plus a
+ *   type badge and a "Change" button.
  *
- * Modell-agnostisch — die `items` liefert der Aufrufer. `v-model` = `value`
- * der Option (oder `null`).
+ * Model-agnostic: the caller supplies `items`. `v-model` is the option's
+ * `value`, or `null`.
  */
 export interface BaseKitRecordOption {
   value: number
   label: string
-  /** Typ-Badge (bereits übersetzt). */
+  /** Type badge — already in the caller's language. */
   type?: string
-  /** Zusatz rechts in der Liste (z. B. Slug). */
+  /** Extra detail on the right of the list, a slug for instance. */
   hint?: string
-  /** Interner Link zum Bearbeiten des Inhalts. */
+  /** Internal link to the record's edit form. */
   editHref?: string
 }
 
 const props = withDefaults(defineProps<{
   modelValue?: number | null
   items: BaseKitRecordOption[]
-  /** Titel des Auswahl-Modals. */
+  /** Title of the picker modal. */
   title?: string
 }>(), {
   modelValue: null,
@@ -72,7 +72,7 @@ function choose(item: BaseKitRecordOption): void {
 
 <template>
   <div>
-    <!-- Gewählt: Titel (Bearbeiten-Link) + Typ-Badge + Ändern -->
+    <!-- Selected: title as an edit link, type badge, change button -->
     <div v-if="selected" class="flex items-center gap-2">
       <NuxtLink
         v-if="selected.editHref"
@@ -93,7 +93,7 @@ function choose(item: BaseKitRecordOption): void {
       </UButton>
     </div>
 
-    <!-- Nichts gewählt: Auswählen -->
+    <!-- Nothing selected: the select button -->
     <UButton v-else color="neutral" variant="subtle" icon="i-lucide-list" @click="openModal">
       {{ labels.select }}
     </UButton>

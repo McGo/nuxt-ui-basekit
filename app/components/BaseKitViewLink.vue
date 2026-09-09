@@ -1,19 +1,19 @@
 <script setup lang="ts">
 /**
- * Weg vom Bearbeiten-Formular zur Ansicht derselben Sache.
+ * The way from an edit form to the public view of the same thing.
  *
- * Die Gegenrichtung gab es längst: In der Ansicht stehen die Kontext-Aktionen
- * („Bearbeiten", „Inhalt pflegen"). Der Rückweg fehlte — wer eine Rubrik
- * bearbeitet hatte, kam nur über den Umweg Übersicht → Frontend → Rubrik
- * dorthin, um das Ergebnis zu sehen.
+ * The opposite direction had existed for a long time: the view carries the
+ * context actions ("Edit", "Manage content"). The way back was missing —
+ * having edited a record, the only route to seeing the result was the detour
+ * through the overview and the front end.
  *
- * Steht neben dem Rücksprung im Seitenkopf, an derselben Stelle wie dort:
- * Erst die Ansicht, dann der Rücksprung zur Liste — die Reihenfolge folgt der
- * Häufigkeit, mit der man beides braucht.
+ * Sits next to the back link in the page header, in the same spot: first the
+ * view, then the way back to the list. The order follows how often each is
+ * needed.
  *
- * **Nur zeigen, wenn es die Ansicht gibt.** Ein neu angelegter Datensatz hat
- * noch keine, und ein Link ins Leere ist schlechter als kein Link. Deshalb
- * gehört das `v-if` an die Aufrufstelle, wo bekannt ist, ob gespeichert wurde.
+ * **Only render it when the view exists.** A freshly created record has none,
+ * and a link into nowhere is worse than no link. That is why the `v-if`
+ * belongs at the call site, where it is known whether anything was saved.
  */
 import { computed } from 'vue'
 import { useBaseKitLabels } from '../composables/useBaseKit'
@@ -21,9 +21,9 @@ import { useBaseKitLabels } from '../composables/useBaseKit'
 const props = withDefaults(defineProps<{
   to: string
   /**
-   * Öffnet die Ansicht in einem neuen Reiter. Voreingestellt, weil man beim
-   * Bearbeiten meist nachsehen und weiterarbeiten will — nicht wechseln und
-   * die ungespeicherten Änderungen verlieren.
+   * Opens the view in a new tab. On by default, because while editing you
+   * usually want to look and carry on — not switch away and lose the unsaved
+   * changes.
    */
   newTab?: boolean
   label?: string

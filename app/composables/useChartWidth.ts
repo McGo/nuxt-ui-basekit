@@ -1,16 +1,16 @@
 import { onBeforeUnmount, onMounted, ref, type Ref } from 'vue'
 
 /**
- * Misst die Breite eines Containers, damit ein SVG in echten Pixeln zeichnen
- * kann statt über eine skalierte `viewBox`.
+ * Measures a container so an SVG can draw in real pixels instead of going
+ * through a scaled `viewBox`.
  *
- * Der Unterschied ist die Schrift: eine `viewBox`, die auf Containerbreite
- * hochgerechnet wird, zieht Achsenbeschriftung und Werte mit hoch — auf einer
- * breiten Karte steht dann 15-px-Text, wo 11 gemeint waren. Mit gemessener
- * Breite bleibt Text Text und nur die Geometrie wächst.
+ * The difference is the type: a `viewBox` scaled up to container width drags
+ * axis labels and values up with it — a wide card then shows 15px text where
+ * 11 was meant. With a measured width, text stays text and only the geometry
+ * grows.
  *
- * Vor dem Mounten (SSR, erster Frame) gilt `fallback`. Das Diagramm ist damit
- * sofort da und rückt einmal zurecht, statt zu flackern.
+ * Before mount (SSR, first frame) `fallback` applies. The chart is therefore
+ * there straight away and settles once, rather than flickering.
  */
 export function useChartWidth(fallback = 640): {
   el: Ref<HTMLElement | null>
@@ -25,8 +25,8 @@ export function useChartWidth(fallback = 640): {
 
     observer = new ResizeObserver((entries) => {
       const measured = entries[0]?.contentRect.width ?? 0
-      // Unter 240 px wird die Geometrie unbrauchbar; dann lieber schmal
-      // zeichnen und den Container scrollen lassen.
+      // Below 240px the geometry becomes useless; draw narrow and let the
+      // container scroll instead.
       if (measured > 0) width.value = Math.max(240, Math.round(measured))
     })
     observer.observe(el.value)

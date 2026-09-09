@@ -1,35 +1,36 @@
 <script setup lang="ts">
 /**
- * Setting-Row — Pattern für eine einzelne Einstellung in einer Settings-Card.
+ * One setting inside a settings card.
  *
  *  ┌──────────────────────────────────────────────────────┐
- *  │ Titel                                       [Action] │
- *  │ Beschreibungstext (optional, mehrzeilig)             │
+ *  │ Title                                       [Control] │
+ *  │ Description (optional, may wrap)                     │
  *  └──────────────────────────────────────────────────────┘
  *
- * Titel + Action stehen auf einer Zeile (Action rechts, Titel links).
- * Die Beschreibung steht darunter, linksbündig zum Titel.
+ * Title and control share a line, title left and control right. The
+ * description sits underneath, aligned with the title.
  *
- * Verwendung:
+ * Usage:
  *
- *   <BaseKitSettingRow title="Benachrichtigungen" description="E-Mails und Push erhalten">
+ *   <BaseKitSettingRow title="Notifications" description="Receive email and push">
  *     <USwitch v-model="notifications" />
  *   </BaseKitSettingRow>
  *
- *   <BaseKitSettingRow title="Sprache" description="Wird beim Speichern übernommen">
+ *   <BaseKitSettingRow title="Language" description="Applied on save">
  *     <USelect v-model="staged" :items="locales" />
  *   </BaseKitSettingRow>
  *
- * Der `meta`-Slot nimmt eine Zusatzzeile unter der Beschreibung auf — Bestand,
- * Sperrgrund, Hinweis. Sie steht bewusst getrennt von `description`: das Feld
- * trägt den einen erklärenden Satz, und eine Zahl ist keine Erklärung.
+ * The `meta` slot takes an extra line below the description — a count, a
+ * reason something is locked, a hint. Kept apart from `description` on
+ * purpose: that field carries the one explaining sentence, and a number is not
+ * an explanation.
  *
- *   <BaseKitSettingRow title="E-Learning" description="Kurse und Nachweise.">
+ *   <BaseKitSettingRow title="E-learning" description="Courses and certificates.">
  *     <USwitch v-model="on" />
- *     <template #meta><span>4 Kurse</span></template>
+ *     <template #meta><span>4 courses</span></template>
  *   </BaseKitSettingRow>
  *
- * Mehrere Rows in einer Card werden über Tailwind divider getrennt:
+ * Several rows in one card are separated with a Tailwind divider:
  *
  *   <UCard>
  *     <div class="divide-y divide-default">

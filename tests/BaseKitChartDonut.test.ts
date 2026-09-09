@@ -42,8 +42,8 @@ describe('BaseKitChartDonut', () => {
   it('draws a full ring when a single slice holds everything', () => {
     const wrapper = render({ slices: [{ key: 'active', label: 'Aktiv', value: 7 }] })
     const path = wrapper.find('path').attributes('d') ?? ''
-    // Ein Bogen von 360° hätte identischen Start- und Endpunkt und
-    // verschwände; deshalb der Sonderweg über zwei Halbkreise.
+    // An arc of 360° would have identical start and end points and vanish,
+    // hence the special case going through two semicircles.
     expect(path).toContain('a')
   })
 

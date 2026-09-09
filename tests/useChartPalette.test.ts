@@ -8,8 +8,8 @@ describe('baseKitChartColor', () => {
   })
 
   it('does not wrap around past the last slot', () => {
-    // Eine wiederverwendete Farbe wäre unter einer Farbfehlsichtigkeit von der
-    // ersten nicht zu unterscheiden — deshalb Grau statt Recycling.
+    // A reused colour would be indistinguishable from the first under a
+    // colour vision deficiency — hence grey rather than recycling.
     expect(baseKitChartColor(BASEKIT_CHART_SLOTS)).toBe('var(--basekit-chart-muted)')
     expect(baseKitChartColor(12)).toBe('var(--basekit-chart-muted)')
   })
@@ -30,8 +30,8 @@ describe('useChartFormat', () => {
   it('formats a share and only says 100 % when it really is', () => {
     expect(percent(1, 2)).toBe('50%')
     expect(percent(5, 5)).toBe('100%')
-    // 99,99 % darf nicht auf 100 % aufgerundet werden — die eine fehlende
-    // Übersetzung wäre sonst unsichtbar.
+    // 99.99% must not round up to 100% — the one missing item would
+    // otherwise be invisible.
     expect(percent(9999, 10000)).toBe('99.9%')
   })
 

@@ -9,7 +9,7 @@ const UInput = {
 }
 const UButton = { emits: ['click'], template: '<button class="u-btn" @click="$emit(\'click\')"><slot /></button>' }
 const UIcon = { props: ['name'], template: '<i :data-icon="name" />' }
-// Native <select>, dessen Options-Index auf den echten (number | 'all')-Wert mappt.
+// A native <select> whose option index maps back to the real (number | 'all') value.
 const USelect = {
   props: ['modelValue', 'items'],
   emits: ['update:modelValue'],
@@ -25,7 +25,7 @@ const UPagination = {
   emits: ['update:page'],
   template: '<div class="u-pagination"><button class="pg-next" @click="$emit(\'update:page\', page + 1)">next</button></div>',
 }
-// BaseKitEmptyState wird im leeren Default-Slot der Tabelle gerendert.
+// BaseKitEmptyState renders in the table's empty default slot.
 const BaseKitEmptyState = {
   props: ['title', 'description', 'variant', 'icon'],
   template: '<div class="empty-state">{{ title }}<span v-if="description"> {{ description }}</span><slot /></div>',
@@ -61,7 +61,7 @@ describe('BaseKitDataTable', () => {
 
   it('sorts ascending then descending on a sortable header click', async () => {
     const w = render()
-    // Sortier-Klick liegt auf dem fokussierbaren Button im Kopf (a11y).
+    // The sort click sits on the focusable button in the header, for a11y.
     const titleHeader = w.findAll('th')[0]!.find('button')
     await titleHeader.trigger('click')
     expect(bodyTitles(w)).toEqual(['Alpha', 'Beta', 'Gamma'])
@@ -77,7 +77,7 @@ describe('BaseKitDataTable', () => {
 
   it('does not sort on a non-sortable header', async () => {
     const w = render()
-    // Nicht sortierbare Spalte hat keinen Button — Klick auf den Kopf tut nichts.
+    // A non-sortable column has no button — clicking the header does nothing.
     await w.findAll('th')[2]!.trigger('click') // path (not sortable)
     expect(bodyTitles(w)).toEqual(['Beta', 'Alpha', 'Gamma'])
   })
@@ -155,7 +155,7 @@ describe('BaseKitDataTable', () => {
     const w = render({ rowLink: (row: { id: number }) => `/admin/pages/${row.id}/edit` })
 
     const links = w.findAll('a')
-    // Ein Link je Zeile — nur in der Namensspalte, nicht in jeder Zelle.
+    // One link per row — in the name column only, not in every cell.
     expect(links).toHaveLength(rows.length)
     expect(links.map(a => a.text())).toContain('Beta')
     expect(links.map(a => a.attributes('href'))).toContain('/admin/pages/1/edit')

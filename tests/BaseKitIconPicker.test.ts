@@ -9,7 +9,7 @@ const UInput = {
   template: '<input class="u-input" :value="modelValue" @input="$emit(\'update:modelValue\', $event.target.value)" />',
 }
 const UButton = { props: ['icon'], emits: ['click'], template: '<button class="u-btn" @click="$emit(\'click\')"><slot /></button>' }
-// Popover rendert Trigger + Inhalt direkt (im Test immer offen).
+// The popover renders trigger and content directly — always open in tests.
 const UPopover = { props: ['open'], template: '<div class="u-pop"><slot /><slot name="content" /></div>' }
 
 function render(modelValue = 'i-lucide-file-text') {
@@ -29,7 +29,8 @@ describe('BaseKitIconPicker', () => {
   })
 
   it('has no free-text field for the icon name (picker only)', () => {
-    // Nur das Suchfeld im Popover ist ein Input — kein Freitext fürs Icon selbst.
+    // Only the search field in the popover is an input — no free text for the
+    // icon itself.
     expect(render().findAll('.u-input')).toHaveLength(1)
   })
 

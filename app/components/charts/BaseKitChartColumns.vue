@@ -1,18 +1,18 @@
 <script setup lang="ts">
 /**
- * Gestapelte Säulen über einer Zeitachse — „was ist je Tag entstanden".
+ * Stacked columns over a time axis — what accrued per day.
  *
- * Warum gestapelt und nicht mehrere Linien: die Frage ist Anteil am Ganzen,
- * nicht Verlauf einzelner Reihen. Und warum Säulen und keine Fläche: Tageswerte
- * sind gezählte Ereignisse, keine stetige Größe — eine Fläche würde zwischen
- * zwei Tagen interpolieren und behaupten, dass um 12 Uhr nachts etwas
- * halb passiert ist.
+ * Stacked rather than several lines because the question is share of the
+ * whole, not the course of individual series. Columns rather than an area
+ * because daily values are counted events, not a continuous quantity: an area
+ * would interpolate between two days and claim something half-happened at
+ * midnight.
  *
- * Trennung zwischen den Segmenten passiert über eine 2-px-Lücke in der
- * Kartenfarbe, nicht über einen Rahmen: ein Rahmen ist Tinte, die keine Daten
- * trägt, und bei dünnen Segmenten überdeckt er den Wert.
+ * Segments are separated by a 2px gap in the card colour rather than a border.
+ * A border is ink that carries no data, and on thin segments it covers the
+ * value.
  *
- * Höchstens fünf Reihen — siehe `useChartPalette`.
+ * Five series at most — see `useChartPalette`.
  */
 import { computed, ref } from 'vue'
 import { baseKitChartColor, useChartFormat } from '../../composables/useChartPalette'
@@ -25,13 +25,13 @@ interface ColumnSeries {
 }
 
 const props = withDefaults(defineProps<{
-  /** Beschriftung je Säule, z. B. ISO-Tage. */
+  /** Label per column, ISO dates for instance. */
   categories: string[]
   series: ColumnSeries[]
   height?: number
-  /** Achsenbeschriftung (kurz) aus einer Kategorie. */
+  /** Short axis label derived from a category. */
   formatCategory?: (value: string) => string
-  /** Ausführliche Fassung für den Tooltip. */
+  /** The long form, for the tooltip. */
   formatCategoryLong?: (value: string) => string
   ariaLabel?: string
 }>(), {
@@ -64,7 +64,7 @@ const plot = computed(() => {
   }
 })
 
-/** Tagessummen — sie bestimmen die Skala und stehen im Tooltip. */
+/** Daily totals — they set the scale and appear in the tooltip. */
 const totals = computed(() =>
   props.categories.map((_, index) =>
     props.series.reduce((sum, s) => sum + (s.points[index] ?? 0), 0),
@@ -72,9 +72,8 @@ const totals = computed(() =>
 )
 
 /**
- * Obere Achsengrenze auf eine runde Zahl aufgerundet. Ohne das steht die
- * Beschriftung auf krummen Werten wie 37, und die Gitterlinien tragen keine
- * ablesbare Auskunft mehr.
+ * Upper axis bound, rounded up to something even. Without it the labels sit on
+ * awkward values like 37 and the grid lines stop telling anyone anything.
  */
 const scaleMax = computed(() => {
   const peak = Math.max(0, ...totals.value)
@@ -100,7 +99,7 @@ function columnX(index: number): number {
   return PADDING.left + plot.value.band * (index + 0.5) - plot.value.columnWidth / 2
 }
 
-/** Runde Kappe nur oben — unten sitzt die Säule auf der Grundlinie auf. */
+/** Rounded cap on top only — the column sits flat on the baseline. */
 function cappedPath(x: number, y: number, w: number, h: number): string {
   const r = Math.min(4, w / 2, h)
   if (h <= 0) return ''
@@ -129,7 +128,7 @@ const columns = computed(() => {
     const segments: Segment[] = []
     let stacked = 0
 
-    // Von unten nach oben stapeln; die oberste Reihe bekommt die Kappe.
+    // Stack bottom to top; the topmost series gets the cap.
     const present = props.series
       .map((s, order) => ({ s, order, value: s.points[index] ?? 0 }))
       .filter(entry => entry.value > 0)
@@ -140,8 +139,8 @@ const columns = computed(() => {
       const top = baseline - (stacked / max) * innerHeight
 
       const isTop = position === present.length - 1
-      // Lücke nach oben, außer beim obersten Segment — dort säße sie
-      // zwischen Säule und Luft und würde die Säule nur kürzen.
+      // A gap above, except on the topmost segment — there it would sit
+      // between the column and thin air and merely shorten it.
       const height = Math.max(0, bottom - top - (isTop ? 0 : GAP))
       if (height <= 0) return
 
@@ -159,9 +158,9 @@ const columns = computed(() => {
 })
 
 /**
- * Beschriftung ausdünnen, bis sie nicht mehr kollidiert — und zwar durch
- * Weglassen, nicht durch Verstecken: ein ausgeblendeter Text bleibt im
- * Baum stehen und wird von Screenreadern trotzdem vorgelesen.
+ * Thin the labels out until they stop colliding — by leaving them out, not by
+ * hiding them: hidden text stays in the tree and screen readers read it
+ * anyway.
  */
 const axisLabels = computed(() => {
   const perLabel = 56
@@ -194,7 +193,7 @@ const tooltip = computed(() => {
         value: s.points[index] ?? 0,
       }))
       .filter(row => row.value > 0),
-    // Am Rand kippt der Kasten nach innen, statt aus der Karte zu laufen.
+    // Near the edge the box flips inward instead of running off the card.
     anchor: PADDING.left + plot.value.band * (index + 0.5),
   }
 })
@@ -218,7 +217,7 @@ function readout(index: number): string {
       :aria-label="props.ariaLabel"
       class="block max-w-full overflow-visible"
     >
-      <!-- Gitter: durchgezogene Haarlinien, eine Stufe von der Fläche weg. -->
+      <!-- Grid: solid hairlines, one step away from the surface. -->
       <g>
         <line
           v-for="tick in ticks"
@@ -242,7 +241,7 @@ function readout(index: number): string {
         >{{ tick.label }}</text>
       </g>
 
-      <!-- Datenmarken -->
+      <!-- Data marks -->
       <g
         v-for="column in columns"
         :key="column.category"
@@ -257,8 +256,8 @@ function readout(index: number): string {
         />
       </g>
 
-      <!-- Trefferflächen: über die volle Höhe und über die ganze Bandbreite,
-           damit niemand eine 14 px schmale Säule treffen muss. -->
+      <!-- Hit areas: full height and the whole band, so nobody has to hit a
+           14px column. -->
       <g>
         <rect
           v-for="column in columns"
@@ -279,7 +278,7 @@ function readout(index: number): string {
         />
       </g>
 
-      <!-- Achsenbeschriftung -->
+      <!-- Axis labels -->
       <text
         v-for="label in axisLabels"
         :key="`label-${label.category}`"
@@ -291,7 +290,7 @@ function readout(index: number): string {
       >{{ label.text }}</text>
     </svg>
 
-    <!-- Tooltip: Wert führt, Reihenname folgt. -->
+    <!-- Tooltip: the value leads, the series name follows. -->
     <div
       v-if="tooltip"
       class="pointer-events-none absolute top-0 z-10 min-w-40 -translate-x-1/2 rounded-md border border-default bg-default p-2 shadow-lg"

@@ -1,13 +1,13 @@
 <script setup lang="ts">
 /**
- * Eine Zahl mit Beschriftung — die richtige Form für einen einzelnen Wert.
+ * A number with a label — the right shape for a single value.
  *
- * Ein Balkendiagramm mit genau einem Balken sagt nicht mehr als die Zahl
- * selbst und kostet die vierfache Fläche. Deshalb sind Bestand und
- * Handlungsliste Kacheln und keine Diagramme.
+ * A bar chart with exactly one bar says no more than the number itself and
+ * costs four times the space. Which is why counts and to-do figures are tiles
+ * here and not charts.
  *
- * `tone` färbt nur, wenn die Zahl über null liegt: „0 offene Vorgänge" ist
- * keine Warnung, sondern der Normalzustand.
+ * `tone` only colours when the number is above zero: "0 open items" is not a
+ * warning, it is the normal state.
  */
 import { computed } from 'vue'
 import { useChartFormat } from '../composables/useChartPalette'
@@ -33,8 +33,8 @@ const valueClass = computed(() => {
   return props.tone === 'alert' ? 'text-error' : 'text-highlighted'
 })
 
-/** Der Punkt neben der Zahl trägt dieselbe Aussage wie die Farbe — die Farbe
- *  allein wäre für eine Rot-Grün-Schwäche keine. */
+/** The dot next to the number carries the same message as the colour — the
+ *  colour alone would carry none under a red-green deficiency. */
 const flagged = computed(() => props.value > 0 && props.tone === 'alert')
 </script>
 

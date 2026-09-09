@@ -3,14 +3,14 @@ import { computed, ref } from 'vue'
 import { useBaseKitLabels } from '../composables/useBaseKit'
 
 /**
- * Icon-Auswahl als Form-Element für `i-lucide-*`-Namen — reine Anzeige + Picker,
- * kein Freitext. Der Trigger zeigt das gewählte Icon (oder einen Platzhalter);
- * ein Klick öffnet ein Popover mit Suche und einem Raster kuratierter Icons.
- * `modelValue` ist der Icon-Name; leerer String bedeutet „kein Icon".
+ * A form control for `i-lucide-*` names — display plus picker, no free text.
+ * The trigger shows the chosen icon, or a placeholder; a click opens a popover
+ * with a search field and a grid of curated icons. `modelValue` is the icon
+ * name, an empty string meaning no icon.
  *
- * Bewusst kuratiert statt des kompletten Iconify-Satzes — das hält den Bundle
- * klein und braucht keine zusätzliche Datenquelle. Fehlt mal ein Icon, wird die
- * Liste unten einfach ergänzt.
+ * Curated rather than the full Iconify set, on purpose: it keeps the bundle
+ * small and needs no extra data source. When an icon is missing, the list
+ * below grows by a line.
  */
 const props = defineProps<{ modelValue: string }>()
 const emit = defineEmits<{ 'update:modelValue': [string] }>()
@@ -20,7 +20,7 @@ const labels = useBaseKitLabels()
 const open = ref(false)
 const search = ref('')
 
-// Kuratierte, für Navigation/Inhalte typische Lucide-Icons.
+// Curated Lucide icons, the ones that come up in navigation and content.
 const ICONS: string[] = [
   'i-lucide-home', 'i-lucide-layout-dashboard', 'i-lucide-layout-grid', 'i-lucide-list',
   'i-lucide-file-text', 'i-lucide-file', 'i-lucide-files', 'i-lucide-folder',

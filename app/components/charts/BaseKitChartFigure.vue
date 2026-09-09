@@ -1,13 +1,13 @@
 <script setup lang="ts">
 /**
- * Rahmen für ein Diagramm: Karte, Titel, Legende und der Umschalter auf die
- * Tabellenansicht.
+ * The frame around a chart: card, title, legend, and the switch to the table
+ * view.
  *
- * Der Umschalter ist keine Zugabe. Ein Diagramm codiert Werte über Farbe und
- * Länge; wer davon nichts hat — Farbfehlsichtigkeit, Screenreader, Ausdruck —
- * braucht dieselben Zahlen in lesbarer Form. Deshalb bringt jede Karte hier
- * ihre Tabelle mit, und deshalb ist der Umschalter sichtbar und nicht in einem
- * Menü versteckt.
+ * That switch is not a nicety. A chart encodes values through colour and
+ * length; anyone who gets nothing out of that — a colour vision deficiency, a
+ * screen reader, a printout — needs the same numbers in readable form. Which
+ * is why every card here brings its table along, and why the switch is visible
+ * rather than buried in a menu.
  */
 import { computed, ref } from 'vue'
 import { useBaseKitLabels } from '../../composables/useBaseKit'
@@ -15,11 +15,11 @@ import { useBaseKitLabels } from '../../composables/useBaseKit'
 const props = withDefaults(defineProps<{
   title: string
   subtitle?: string
-  /** Wohin die Karte führt. Ohne Ziel bleibt der Titel ein Titel. */
+  /** Where the card leads. Without a target the title stays a title. */
   href?: string
-  /** Diagramm ausgrauen, während im Hintergrund nachgeladen wird. */
+  /** Grey the chart out while something reloads in the background. */
   stale?: boolean
-  /** Ohne Tabellen-Slot entfällt der Umschalter. */
+  /** Without a table slot the switch disappears. */
   tableAvailable?: boolean
 }>(), {
   subtitle: undefined,

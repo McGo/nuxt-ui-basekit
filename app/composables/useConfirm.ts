@@ -2,10 +2,10 @@ import { useConfirmStore } from '../stores/confirm'
 import type { BaseKitConfirmOptions } from '../stores/confirm'
 
 /**
- * Bestätigungsabfrage als Ersatz für natives `window.confirm`.
+ * A confirmation prompt in place of the native `window.confirm`.
  *
- * Öffnet das global gemountete `BaseKitConfirmModal` und liefert ein Promise,
- * das mit `true`/`false` auflöst.
+ * Opens the globally mounted `BaseKitConfirmModal` and returns a promise that
+ * resolves to `true` or `false`.
  *
  *   const confirm = useConfirm()
  *   if (!(await confirm({ description: t('…'), color: 'error', confirmLabel: t('common.delete') }))) return

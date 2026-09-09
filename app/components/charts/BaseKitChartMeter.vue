@@ -1,10 +1,10 @@
 <script setup lang="ts">
 /**
- * Ein Verhältnis gegen eine bekannte Grenze — „so viele von so vielen".
+ * A ratio against a known limit — this many of that many.
  *
- * Ein Meter setzt voraus, dass es ein Ganzes gibt. Wo keins existiert (Bytes
- * ohne Kontingent, Anzahl ohne Obergrenze), gehört die Zahl in eine Kachel und
- * nicht hierher; ein voller Balken behauptete sonst eine erreichte Grenze.
+ * A meter presupposes that a whole exists. Where none does — bytes without a
+ * quota, a count without a ceiling — the number belongs in a tile and not
+ * here; a full bar would otherwise claim a limit had been reached.
  */
 import { computed } from 'vue'
 import { baseKitChartColor, useChartFormat } from '../../composables/useChartPalette'

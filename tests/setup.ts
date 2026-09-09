@@ -1,24 +1,24 @@
 /**
- * Vitest-Setup.
+ * Vitest setup.
  *
- * Ersetzt Nuxts virtuelles `#imports` durch Mocks, damit die Komponenten ohne
- * Nuxt-Boot laufen. Als `vi.fn()`, nicht als feste Funktionen: die Tests der
- * Reiter setzen Route und Router je Fall (`mockReturnValueOnce`), um das
- * Verhalten am URL-Hash zu prüfen.
+ * Replaces Nuxt's virtual `#imports` with mocks so the components run without
+ * booting Nuxt. As `vi.fn()` rather than fixed functions: the tabs tests set
+ * route and router per case through `mockReturnValueOnce` to exercise the
+ * URL-fragment behaviour.
  *
- * Absichtlich schmal — BaseKit holt sich von dort nur `useRoute` und
- * `useRouter`. Was das Paket nicht benutzt, steht hier auch nicht.
+ * Deliberately narrow — BaseKit only takes `useRoute` and `useRouter` from
+ * there. What the package does not use is not here either.
  */
 import { vi } from 'vitest'
 import { ref } from 'vue'
 
-const zustaende = new Map<string, ReturnType<typeof ref>>()
+const states = new Map<string, ReturnType<typeof ref>>()
 
 vi.mock('#imports', () => ({
   useRoute: vi.fn(() => ({ path: '/', params: {}, query: {}, hash: '' })),
   useRouter: vi.fn(() => ({ replace: vi.fn(), push: vi.fn() })),
   useState: vi.fn((key: string, init?: () => unknown) => {
-    if (!zustaende.has(key)) zustaende.set(key, ref(init ? init() : null))
-    return zustaende.get(key)!
+    if (!states.has(key)) states.set(key, ref(init ? init() : null))
+    return states.get(key)!
   }),
 }))

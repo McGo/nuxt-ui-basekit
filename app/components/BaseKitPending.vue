@@ -1,35 +1,34 @@
 <script setup lang="ts">
 /**
- * Ladezustand für eine Seite oder einen Abschnitt.
+ * A loading state for a page or a section of one.
  *
- * Die Admin-Seiten holen ihre Daten in `onMounted` nach. Ohne Zwischenschritt
- * steht das Formular sofort da — mit leeren Feldern, die sich einen Wimpernschlag
- * später von selbst füllen. Wer schnell tippt, schreibt in ein Feld, das gleich
- * überschrieben wird; wer langsam liest, hält den Datensatz für leer.
+ * Pages that fetch in `onMounted` show their form immediately otherwise — with
+ * empty fields that fill themselves a blink later. Whoever types fast writes
+ * into a field that is about to be overwritten; whoever reads slowly takes the
+ * record for empty.
  *
- * Deshalb: erst ein Kreisel, dann der Inhalt. Der Kreisel sagt „gleich", das
- * leere Formular sagt „nichts da" — und das eine ist wahr, das andere nicht.
+ * Hence: spinner first, content after. The spinner says "in a moment", the
+ * empty form says "nothing here" — and only one of those is true.
  *
- * Zwei Wege, beide gültig:
+ * Two ways, both valid:
  *
  *   <BaseKitPending :pending="pending">
- *     <UForm …>   <!-- erscheint erst, wenn die Daten stehen -->
+ *     <UForm …>   <!-- appears once the data is in -->
  *   </BaseKitPending>
  *
  *   <BaseKitPending v-if="pending" />
  *
- * `label` nur setzen, wo der Vorgang länger dauert und einen Namen hat („Suche
- * läuft"). Bei einem gewöhnlichen Formular ist der Kreisel allein ehrlicher als
- * ein Wort, das niemand liest.
+ * Set `label` only where the operation takes a while and has a name ("Searching").
+ * On an ordinary form the bare spinner is more honest than a word nobody reads.
  */
 withDefaults(defineProps<{
-  /** Solange wahr, steht der Kreisel statt des Inhalts. */
+  /** While true, the spinner stands in for the content. */
   pending?: boolean
-  /** Optionale Beschriftung unter dem Kreisel. */
+  /** Optional label below the spinner. */
   label?: string
   /**
-   * Höhe des Bereichs. `page` für eine ganze Seite, `inline` für einen
-   * Abschnitt darin — sonst springt das Layout, wenn der Inhalt erscheint.
+   * Height of the area. `page` for a whole page, `inline` for a section within
+   * one — otherwise the layout jumps when the content arrives.
    */
   size?: 'page' | 'inline'
 }>(), {

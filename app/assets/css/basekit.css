@@ -1,18 +1,18 @@
 /* ==========================================================================
- * BaseKit — Gestaltungs-Token
+ * BaseKit — design tokens
  *
- * Die Komponenten greifen ausschließlich auf `--basekit-*` zu und nie auf
- * Variablen einer bestimmten Anwendung. Hier stehen die Voreinstellungen.
+ * The components only ever reach for `--basekit-*`, never for a variable
+ * belonging to one particular application. What follows are the defaults.
  *
- * Eine Anwendung mit eigenem Theme legt die Token an einer Stelle auf ihre
- * eigenen Variablen — ein Block in ihrem Stylesheet, geladen nach diesem:
+ * An application with its own theme maps the tokens onto its own variables in
+ * one place — a block in its stylesheet, loaded after this one:
  *
  *   :root {
- *     --basekit-accent: var(--meine-markenfarbe, #2563eb);
- *     --basekit-surface: var(--meine-kartenflaeche, #ffffff);
+ *     --basekit-accent: var(--my-brand-colour, #2563eb);
+ *     --basekit-surface: var(--my-card-surface, #ffffff);
  *   }
  *
- * Fällt der Block weg, rendern die Komponenten in den Werten von hier weiter.
+ * Drop that block and the components keep rendering with the values here.
  * ========================================================================== */
 
 :root {
@@ -38,21 +38,20 @@
 }
 
 /* --------------------------------------------------------------------------
- * Diagramm-Farben (BaseKitChart*)
+ * Chart colours (BaseKitChart*)
  *
- * Bewusst **nicht** aus der Markenfarbe abgeleitet. Ein Theme darf jede
- * Akzentfarbe tragen — vier davon nebeneinander in einer gestapelten Fläche
- * ergäben Reihen, die man nicht mehr auseinanderhält, und bei einer
- * Rot-Grün-Schwäche gar nichts mehr. Die fünf Reihenfarben stehen deshalb
- * fest und sind gegen die Kartenfläche geprüft (Lichtheitsband, Chroma,
- * CVD-Abstand ΔE ≥ 8 zwischen Nachbarn, Normalsicht ΔE ≥ 15).
+ * Deliberately **not** derived from the brand colour. A theme may carry any
+ * accent — four shades of it side by side in a stacked area would give series
+ * nobody can tell apart, and under a red-green deficiency nothing at all. The
+ * five series colours are therefore fixed and validated against the card
+ * surface: lightness band, chroma, CVD distance ΔE ≥ 8 between neighbours,
+ * ΔE ≥ 15 for normal vision.
  *
- * Reihenfolge ist Teil der Prüfung: wer sie umsortiert oder eine sechste
- * Farbe dazustellt, muss neu messen. Über fünf Reihen fasst die Übersicht
- * zusammen, statt eine Farbe zu erfinden.
+ * Order is part of that validation. Reordering them, or adding a sixth, means
+ * measuring again. Beyond five series, group them rather than invent a colour.
  *
- * Ein Kundenprojekt darf die Werte überschreiben — dann aber bitte als
- * geprüften Satz und nicht einzeln.
+ * A project may override the values — as a validated set, though, not one at
+ * a time.
  * ------------------------------------------------------------------------ */
 :root {
   --basekit-chart-1: #2a78d6;
@@ -61,13 +60,13 @@
   --basekit-chart-4: #eda100;
   --basekit-chart-5: #e87ba4;
 
-  /* Die Fläche, in der ein Diagramm sitzt. Trägt die 2-px-Lücke zwischen
-   * gestapelten Segmenten und den Ring um Punkte — deshalb muss sie der
-   * Kartenfarbe entsprechen und nicht „irgendwie weiß" sein. */
+  /* The surface a chart sits on. It carries the 2px gap between stacked
+   * segments and the ring around points — which is why it has to match the
+   * card colour rather than being white-ish. */
   --basekit-chart-surface: var(--ui-bg, #ffffff);
   --basekit-chart-grid: rgb(0 0 0 / 8%);
   --basekit-chart-axis: rgb(0 0 0 / 18%);
-  /* Zurückgenommene Reihe: Kontext, nicht Aussage. */
+  /* Muted series: context, not a statement. */
   --basekit-chart-muted: rgb(0 0 0 / 22%);
 }
 

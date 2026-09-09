@@ -22,7 +22,7 @@ describe('BaseKitEmptyState', () => {
   })
 
   it('omits the description paragraph when not provided', () => {
-    // Nur der Titel-Absatz existiert, kein zweiter <p>.
+    // Only the title paragraph exists, no second <p>.
     expect(render().findAll('p')).toHaveLength(1)
   })
 

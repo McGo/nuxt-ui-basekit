@@ -1,32 +1,32 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
-/** Optionen für eine Bestätigungsabfrage. */
+/** Options for one confirmation prompt. */
 export interface BaseKitConfirmOptions {
-  /** Titel des Dialogs (Default: `common.confirm.title`). */
+  /** Dialog title. Falls back to the `confirmTitle` label. */
   title?: string
-  /** Erklärtext / Konsequenz — bei Destruktivem ausformulieren. */
+  /** Explanation or consequence — spell it out for anything destructive. */
   description?: string
-  /** Beschriftung des Bestätigen-Buttons (Default: `common.confirm.confirm`). */
+  /** Label of the confirm button. Falls back to the `confirm` label. */
   confirmLabel?: string
-  /** Beschriftung des Abbrechen-Buttons (Default: `common.cancel`). */
+  /** Label of the cancel button. Falls back to the `cancel` label. */
   cancelLabel?: string
-  /** Farbe des Bestätigen-Buttons — `error` für destruktive Aktionen. */
+  /** Colour of the confirm button — `error` for destructive actions. */
   color?: 'error' | 'primary'
-  /** Optionales Icon am Bestätigen-Button. */
+  /** Optional icon on the confirm button. */
   icon?: string
 }
 
 /**
- * Zentraler Bestätigungs-Store — ersetzt native `window.confirm`-Dialoge durch
- * eine gethemte, dark-mode-fähige Abfrage.
+ * The confirmation store — replaces native `window.confirm` dialogs with a
+ * themed, dark-mode-capable prompt.
  *
- * `ask()` öffnet das global gemountete `BaseKitConfirmModal` und liefert ein
- * Promise, das mit `true` (bestätigt) oder `false` (abgebrochen/geschlossen)
- * auflöst. Der Resolver lebt außerhalb der Reaktivität, damit genau eine
- * Antwort pro Abfrage zurückgeht.
+ * `ask()` opens the globally mounted `BaseKitConfirmModal` and returns a
+ * promise resolving to `true` (confirmed) or `false` (cancelled or closed).
+ * The resolver lives outside reactivity so exactly one answer goes back per
+ * prompt.
  *
- * Genutzt über das Composable `useConfirm()`:
+ * Used through the `useConfirm()` composable:
  *   const confirm = useConfirm()
  *   if (!(await confirm({ description: t('…'), color: 'error' }))) return
  */
@@ -36,7 +36,7 @@ export const useConfirmStore = defineStore('basekit:confirm', () => {
   let resolver: ((value: boolean) => void) | null = null
 
   function ask(opts: BaseKitConfirmOptions = {}): Promise<boolean> {
-    // Läuft noch eine Abfrage, wird sie als abgebrochen aufgelöst.
+    // A prompt still running is resolved as cancelled.
     resolver?.(false)
     options.value = opts
     open.value = true
@@ -45,7 +45,7 @@ export const useConfirmStore = defineStore('basekit:confirm', () => {
     })
   }
 
-  /** Abfrage beantworten und Dialog schließen. */
+  /** Answer the prompt and close the dialog. */
   function settle(value: boolean): void {
     open.value = false
     resolver?.(value)

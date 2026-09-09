@@ -3,43 +3,43 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from '#imports'
 
 /**
- * Tab-Gruppierung — Pattern, um auf einer Seite mehrere Bereiche (z.B.
- * Einstellungs-Gruppen) zu gliedern, gerade bei vielen Feldern.
+ * Splits a page into sections — settings groups, say, and anything else that
+ * gets unwieldy once there are many fields.
  *
- * Generisch: pro Tab ein benannter Slot (= dessen `key`). Aktiver Tab optional
- * über `v-model` steuerbar, sonst der erste.
+ * One named slot per tab, keyed by its `key`. The active tab is optionally
+ * driven through `v-model`; without it the first one wins.
  *
  *   <BaseKitTabs :items="[
- *     { key: 'general', label: 'Allgemein', icon: 'i-lucide-settings' },
- *     { key: 'access',  label: 'Zugriff',   icon: 'i-lucide-lock' },
+ *     { key: 'general', label: 'General', icon: 'i-lucide-settings' },
+ *     { key: 'access',  label: 'Access',  icon: 'i-lucide-lock' },
  *   ]">
  *     <template #general> … </template>
  *     <template #access>  … </template>
  *   </BaseKitTabs>
  *
- * Deep-Linking: mit `hash-nav` ist der aktive Tab über den URL-Hash adressierbar
- * (`…/seite#access`). Beim Laden gewinnt ein passender Hash; ein Tab-Wechsel
- * schreibt den Hash via `router.replace` (kein History-Spam). Bei mehreren
- * Tab-Gruppen auf einer Seite nur EINE mit `hash-nav` betreiben.
+ * Deep linking: with `hash-nav` the active tab becomes addressable through the
+ * URL fragment (`…/page#access`). On load a matching hash wins; switching tabs
+ * writes the hash through `router.replace`, so the history stays clean. With
+ * several tabsets on one page, run only ONE of them with `hash-nav`.
  *
- * Der Hash greift bewusst erst `onMounted`: der Server sieht ihn gar nicht
- * (Browser schicken ihn nicht mit), und ein davon abweichender erster Render
- * im Client zerlegt die Hydration — dann stand die Markierung auf dem einen
- * Tab und der Inhalt kam vom anderen. Aus demselben Grund läuft er über
- * `select()`, damit ein gebundenes `v-model` den Tab aus dem Hash mitbekommt.
+ * The hash is applied `onMounted` on purpose. The server never sees it —
+ * browsers do not send it — and a first client render that differs from the
+ * server's tears the hydration apart: the marker sat on one tab while the
+ * content came from another. For the same reason it goes through `select()`,
+ * so a bound `v-model` learns about the tab from the hash.
  *
- * A11y: tablist/tab/tabpanel-Rollen, Pfeiltasten links/rechts wechseln.
+ * Accessibility: tablist/tab/tabpanel roles, left and right arrow keys switch.
  *
- * Layout-Konvention: die Tab-Leiste NICHT in eine `UCard` wrappen — Tabs +
- * Inhalt liegen direkt auf der Seite. Feinere Struktur je Tab-Inhalt (Gruppen,
- * Fieldset, einzelne Cards) nach Bedarf INNERHALB des jeweiligen Slots.
+ * Layout convention: do NOT wrap the tab bar in a `UCard` — tabs and content
+ * sit directly on the page. Finer structure per tab (groups, fieldsets,
+ * individual cards) belongs INSIDE the respective slot.
  */
 const props = withDefaults(defineProps<{
-  /** Tab-Definitionen (Reihenfolge = Anzeigereihenfolge). */
+  /** Tab definitions; their order is the display order. */
   items: Array<{ key: string, label: string, icon?: string }>
-  /** Aktiver Tab-Key (v-model). Ohne Bindung wird der erste Tab aktiv. */
+  /** Key of the active tab (v-model). Unbound, the first tab becomes active. */
   modelValue?: string
-  /** Aktiven Tab über den URL-Hash adressierbar machen (`#<key>`). */
+  /** Make the active tab addressable through the URL fragment (`#<key>`). */
   hashNav?: boolean
 }>(), {
   modelValue: undefined,
@@ -53,7 +53,7 @@ const emit = defineEmits<{
 const route = useRoute()
 const router = useRouter()
 
-/** Gültiger Tab-Key aus dem aktuellen URL-Hash, sonst null. */
+/** A valid tab key from the current URL fragment, otherwise null. */
 function keyFromHash(): string | null {
   if (!props.hashNav) return null
   const key = String(route.hash ?? '').replace(/^#/, '')
@@ -62,36 +62,35 @@ function keyFromHash(): string | null {
 
 const active = ref<string>(props.modelValue ?? props.items[0]?.key ?? '')
 
-/** Hat der Nutzer selbst gewählt? Dann gewinnt seine Wahl über den Hash. */
+/** Did the user choose themselves? Then their choice beats the hash. */
 const picked = ref(false)
 
-// Hash erst im Client anwenden — siehe Kommentar oben.
+// Apply the hash on the client only — see the comment at the top.
 onMounted(() => applyHash())
 
-// v-model rein: Auswahl von außen übernehmen.
+// v-model coming in: take the selection from outside.
 watch(() => props.modelValue, (next) => {
   if (next !== undefined && next !== active.value) active.value = next
 })
 
-// Hash ändert sich (Direktlink, Zurück/Vorwärts) → passenden Tab aktivieren.
+// The hash changed — a direct link, back or forward — so activate that tab.
 watch(() => route.hash, () => {
   const key = keyFromHash()
   if (key !== null && key !== active.value) active.value = key
 })
 
-// Items wechseln. Zwei Fälle: der Tab aus dem Hash taucht erst jetzt auf
-// (rechte-abhängige Tabs kommen mit dem Bootstrap nach) — dann übernehmen,
-// solange der Nutzer nicht selbst gewählt hat. Sonst: fällt der aktive Tab
-// weg, zurück auf den ersten.
+// The items changed. Two cases: the tab named in the hash only appears now —
+// permission-dependent tabs arrive late — in which case take it, as long as
+// the user has not chosen themselves. Otherwise, if the active tab disappears,
+// fall back to the first.
 watch(() => props.items, (items) => {
   if (!picked.value && applyHash()) return
   if (!items.some(i => i.key === active.value)) active.value = items[0]?.key ?? ''
 })
 
 /**
- * Tab aus dem Hash übernehmen, falls er zu einem Item passt und nicht schon
- * aktiv ist. Zählt nicht als Nutzer-Wahl. Liefert `true`, wenn gewechselt
- * wurde.
+ * Take the tab from the hash if it matches an item and is not already active.
+ * Does not count as a user choice. Returns `true` when it switched.
  */
 function applyHash(): boolean {
   const key = keyFromHash()

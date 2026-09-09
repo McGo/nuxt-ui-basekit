@@ -19,7 +19,7 @@ function render(props: Record<string, unknown> = {}, slots: Record<string, strin
   })
 }
 
-/** Sichtbarkeit über `v-show` — die Knoten bleiben, das `display` wechselt. */
+/** Visibility through `v-show` — the nodes stay, only `display` changes. */
 function visible(wrapper: ReturnType<typeof render>, selector: string): boolean {
   const el = wrapper.find(selector).element.parentElement
   return el ? el.style.display !== 'none' : false

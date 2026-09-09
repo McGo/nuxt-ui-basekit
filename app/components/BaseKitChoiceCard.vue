@@ -1,18 +1,18 @@
 <script setup lang="ts">
 /**
- * Auswahl-Karte — Pattern für „aus einer Handvoll Varianten eine wählen“,
- * wenn die Varianten sich zeigen lassen (Themes, Layouts, Vorlagen).
- * Ein Dropdown zeigt nur Namen; hier steht die Vorschau daneben.
+ * Pick one of a handful of variants, for the case where the variants can be
+ * shown — themes, layouts, templates. A dropdown gives you names only; here
+ * the preview sits right next to the label.
  *
  *  ┌──────────────────────────┐
- *  │                          │  ← Slot `preview` (stilisierte Vorschau)
- *  │        Vorschau          │
+ *  │                          │  ← `preview` slot (a stylised rendering)
+ *  │        Preview           │
  *  ├──────────────────────────┤
- *  │ Titel          [ Aktiv ] │  ← aktiv: Badge, sonst Knopf „Übernehmen“
- *  │ Beschreibung             │
+ *  │ Title         [ Active ] │  ← active: a badge, otherwise an Apply button
+ *  │ Description              │
  *  └──────────────────────────┘
  *
- * Verwendung (Karten in einem Grid, eine pro Variante):
+ * Usage — cards in a grid, one per variant:
  *
  *   <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
  *     <BaseKitChoiceCard
@@ -25,28 +25,28 @@
  *       :pending="pending"
  *       @apply="apply(o.id)"
  *     >
- *       <template #preview><MeineVorschau :id="o.id" /></template>
+ *       <template #preview><MyPreview :id="o.id" /></template>
  *     </BaseKitChoiceCard>
  *   </div>
  *
- * Die Karte selbst löst nichts aus — gewählt wird über den Knopf. Bei einer
- * Auswahl, die sofort für alle gilt, ist ein Klick daneben sonst schnell
- * passiert.
+ * The card itself triggers nothing — the button does the choosing. Where a
+ * choice takes effect for everyone at once, a stray click is otherwise made
+ * quickly.
  */
 withDefaults(defineProps<{
-  /** Name der Variante. */
+  /** Name of the variant. */
   title: string
-  /** Kurze Erläuterung unter dem Titel. */
+  /** A short explanation below the title. */
   description?: string
-  /** Diese Variante ist die aktive. */
+  /** This variant is the active one. */
   active?: boolean
-  /** Läuft gerade ein Speichervorgang (sperrt den Knopf). */
+  /** A save is in flight — disables the button. */
   pending?: boolean
-  /** Beschriftung des Knopfes für „diese Variante übernehmen“. */
+  /** Label of the button that applies this variant. */
   applyLabel?: string
-  /** Beschriftung des Aktiv-Kennzeichens. */
+  /** Label of the active badge. */
   activeLabel?: string
-  /** Seitenverhältnis der Vorschaufläche. */
+  /** Aspect ratio of the preview area. */
   ratio?: string
 }>(), {
   description: undefined,

@@ -10,14 +10,14 @@ import {
 } from '../app/composables/useBaseKit'
 
 /**
- * Der Kontrakt zwischen Kit und Anwendung.
+ * The contract between the kit and the application using it.
  *
- * Zwei Dinge müssen stimmen, damit sich `base/` eines Tages als Paket
- * herausschneiden lässt: ohne Anwendung rendert es trotzdem lesbar, und mit
- * Anwendung gewinnt deren Tabelle. Beides steht hier.
+ * Two things have to hold for the package to stand on its own: without an
+ * application it still renders something readable, and with one, that
+ * application's table wins. Both are checked here.
  */
 
-function mitKonfiguration(config: Partial<BaseKitConfig>) {
+function withConfig(config: Partial<BaseKitConfig>) {
   return computed<BaseKitConfig>(() => ({
     ...BASEKIT_DEFAULTS,
     ...config,
@@ -26,7 +26,7 @@ function mitKonfiguration(config: Partial<BaseKitConfig>) {
 }
 
 describe('useBaseKit', () => {
-  it('rendert die Voreinstellung, wenn keine Anwendung etwas bereitstellt', () => {
+  it('renders the defaults when no application provides anything', () => {
     const w = mount(BaseKitBackLink, {
       props: { to: '/admin/users' },
       global: { stubs: { NuxtLink: { template: '<a><slot /></a>' }, UIcon: true } },
@@ -35,11 +35,11 @@ describe('useBaseKit', () => {
     expect(w.text()).toBe('Back to overview')
   })
 
-  it('nimmt die Beschriftungen der Anwendung, wenn sie welche bereitstellt', () => {
+  it('takes the application labels when it provides some', () => {
     const w = mount(BaseKitBackLink, {
       props: { to: '/admin/users' },
       global: {
-        provide: { [baseKitKey as symbol]: mitKonfiguration({ labels: { ...BASEKIT_DEFAULTS.labels, back: 'Back to list' } }) },
+        provide: { [baseKitKey as symbol]: withConfig({ labels: { ...BASEKIT_DEFAULTS.labels, back: 'Back to list' } }) },
         stubs: { NuxtLink: { template: '<a><slot /></a>' }, UIcon: true },
       },
     })
@@ -47,47 +47,47 @@ describe('useBaseKit', () => {
     expect(w.text()).toBe('Back to list')
   })
 
-  it('lässt ein Prop weiterhin über die bereitgestellte Beschriftung gewinnen', () => {
+  it('still lets a prop win over the provided label', () => {
     const w = mount(BaseKitBackLink, {
-      props: { to: '/admin/users', label: 'Zurück zu den Rubriken' },
+      props: { to: '/admin/users', label: 'Back to sections' },
       global: {
-        provide: { [baseKitKey as symbol]: mitKonfiguration({ labels: { ...BASEKIT_DEFAULTS.labels, back: 'Back to list' } }) },
+        provide: { [baseKitKey as symbol]: withConfig({ labels: { ...BASEKIT_DEFAULTS.labels, back: 'Back to list' } }) },
         stubs: { NuxtLink: { template: '<a><slot /></a>' }, UIcon: true },
       },
     })
 
-    expect(w.text()).toBe('Zurück zu den Rubriken')
+    expect(w.text()).toBe('Back to sections')
   })
 
-  it('reicht die Sprache für Intl durch', () => {
-    let gelesen = ''
+  it('passes the locale through for Intl', () => {
+    let seen = ''
     const Probe = defineComponent({
       setup() {
         const config = useBaseKit()
-        gelesen = config.value.locale
+        seen = config.value.locale
         return () => h('div')
       },
     })
 
     mount(Probe, {
-      global: { provide: { [baseKitKey as symbol]: mitKonfiguration({ locale: 'fr-FR' }) } },
+      global: { provide: { [baseKitKey as symbol]: withConfig({ locale: 'fr-FR' }) } },
     })
 
-    expect(gelesen).toBe('fr-FR')
+    expect(seen).toBe('fr-FR')
   })
 
-  it('deckt jede Beschriftung mit einer Voreinstellung ab', () => {
-    // Eine fehlende Voreinstellung fällt sonst erst dort auf, wo eine
-    // Anwendung die Tabelle nicht vollständig füllt — und rendert leer.
-    for (const [name, wert] of Object.entries(BASEKIT_DEFAULTS.labels)) {
-      if (typeof wert === 'function') continue
-      if (typeof wert === 'object') {
-        for (const [unter, u] of Object.entries(wert)) {
-          expect(u, `${name}.${unter}`).toBeTruthy()
+  it('covers every label with a default', () => {
+    // A missing default otherwise only shows up where an application fills
+    // the table incompletely — and then renders empty.
+    for (const [name, value] of Object.entries(BASEKIT_DEFAULTS.labels)) {
+      if (typeof value === 'function') continue
+      if (typeof value === 'object') {
+        for (const [sub, v] of Object.entries(value)) {
+          expect(v, `${name}.${sub}`).toBeTruthy()
         }
         continue
       }
-      expect(wert, name).toBeTruthy()
+      expect(value, name).toBeTruthy()
     }
 
     expect(BASEKIT_DEFAULTS.labels.paginationRange({ from: 1, to: 25, total: 300 }))

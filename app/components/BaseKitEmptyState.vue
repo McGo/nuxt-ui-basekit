@@ -1,14 +1,14 @@
 <script setup lang="ts">
 /**
- * BaseKitEmptyState — einheitlicher Leerzustand: Icon + handlungsorientierte
- * Überschrift + optionaler Erklärtext + optionale Primäraktion (Default-Slot).
+ * One empty state for all of them: icon, an action-shaped heading, optional
+ * explanation, optional primary action in the default slot.
  *
- * `variant` trennt die beiden Fälle aus docs/18:
- * - `empty`  → „noch nichts angelegt" (führt zum ersten Schritt)
- * - `search` → „kein Suchergebnis" (bestätigt die Suche, bietet Korrektur)
+ * `variant` separates the two cases that look alike and mean different things:
+ * - `empty`  — nothing has been created yet; leads to the first step.
+ * - `search` — the query ran and found nothing; confirms it, offers a fix.
  *
- * Das passende Icon wird je Variante gewählt, kann per `icon` überschrieben
- * werden. Aktion (z. B. ein `UButton`) kommt in den Default-Slot.
+ * The icon follows the variant and can be overridden through `icon`. The
+ * action (a `UButton`, say) goes into the default slot.
  */
 withDefaults(defineProps<{
   title: string

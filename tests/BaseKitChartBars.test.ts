@@ -48,7 +48,7 @@ describe('BaseKitChartBars', () => {
     })
     expect(wrapper.findAll('li')).toHaveLength(3)
     expect(wrapper.text()).toContain('Weitere')
-    // 3 = nur C, denn A und B stehen selbst da.
+    // 3 = C alone, because A and B stand on their own.
     expect(wrapper.findAll('li').at(2)!.text()).toContain('3')
   })
 

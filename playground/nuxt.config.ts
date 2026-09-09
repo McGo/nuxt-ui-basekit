@@ -1,27 +1,27 @@
 /**
- * Entwicklungs-Harnisch für den Layer.
+ * Development harness for the layer.
  *
- * Bindet das Paket so ein, wie es ein Konsument täte — über den Paketnamen,
- * nicht über einen relativen Pfad. `file:..` in der package.json legt dafür
- * einen Symlink, Änderungen am Layer greifen also sofort.
+ * Pulls the package in the way a consumer would — through the package name,
+ * not a relative path. `file:..` in package.json creates the symlink for that,
+ * so changes to the layer take effect immediately.
  *
- * Der Playground wird nicht mitveröffentlicht: `files` in der package.json des
- * Pakets führt ihn nicht auf.
+ * The playground is not published along: `files` in the package's package.json
+ * does not list it.
  */
 export default defineNuxtConfig({
   modules: ['@nuxt/ui', '@pinia/nuxt'],
   extends: ['nuxt-ui-basekit'],
 
-  // Tailwind und das Theme von Nuxt UI. Der Layer lädt sein eigenes
-  // Stylesheet mit den --basekit-*-Token dazu — dort steht nur, was die
-  // Komponenten an Farben brauchen, keine Utilities.
+  // Tailwind and the Nuxt UI theme. The layer loads its own stylesheet with
+  // the --basekit-* tokens on top of that — which holds only the colours the
+  // components need, no utilities.
   css: ['~/assets/css/main.css'],
 
   devtools: { enabled: false },
   ssr: true,
 
-  // Feste Farbwahl, damit die Aufnahmen nicht davon abhängen, was das
-  // Betriebssystem des Aufnehmenden gerade bevorzugt.
+  // A fixed colour mode, so the screenshots do not depend on what the
+  // operating system of whoever takes them happens to prefer.
   colorMode: {
     preference: 'light',
     fallback: 'light',
@@ -29,15 +29,15 @@ export default defineNuxtConfig({
 
   vite: {
     resolve: {
-      // Eigenheit des Symlinks, nicht des Pakets: `node_modules/nuxt-ui-basekit`
-      // zeigt auf das Repo-Wurzelverzeichnis, und von dort aus findet die
-      // Auflösung zuerst die Dev-Abhängigkeiten des Layers. Ohne `dedupe`
-      // laufen zwei Pinia-Instanzen nebeneinander und `useConfirmStore()`
-      // sucht seinen Store in der falschen — „getActivePinia() was called but
-      // there was no active Pinia".
+      // A quirk of the symlink, not of the package: `node_modules/nuxt-ui-basekit`
+      // points at the repository root, and resolution from there finds the
+      // layer's own dev dependencies first. Without `dedupe` two Pinia
+      // instances run side by side and `useConfirmStore()` looks for its store
+      // in the wrong one — "getActivePinia() was called but there was no
+      // active Pinia".
       //
-      // Ein echter Konsument hat das Problem nicht: dort bringt das
-      // installierte Paket keine eigenen node_modules mit.
+      // A real consumer does not have this problem: there the installed
+      // package brings no node_modules of its own.
       dedupe: ['pinia', 'vue', 'vue-router'],
     },
   },

@@ -4,77 +4,77 @@ import { join, relative, resolve, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 /**
- * Was dieses Paket nicht darf.
+ * What this package is not allowed to do.
  *
- * BaseKit ist aus einer Anwendung herausgeschnitten worden, und der Schnitt
- * hält nur, solange niemand ihn wieder zunäht. Drei Sorten Rückfall gibt es,
- * und alle drei fallen erst im fremden Projekt auf, wenn dort etwas leer
- * rendert oder gar nicht baut:
+ * BaseKit was carved out of an application, and the cut only holds as long as
+ * nobody sews it shut again. There are three kinds of relapse, and all three
+ * surface only in somebody else's project, where something renders empty or
+ * fails to build at all:
  *
- * 1. ein Import auf etwas, das nur in der Herkunfts-Anwendung existiert,
- * 2. ein Übersetzungsschlüssel statt einer Beschriftung aus `useBaseKit()`,
- * 3. eine CSS-Variable, die eine fremde Anwendung setzt.
+ * 1. an import of something that exists only in the application of origin,
+ * 2. a translation key instead of a label from `useBaseKit()`,
+ * 3. a CSS variable that a foreign application sets.
  *
- * Erlaubt sind npm-Pakete, die Nuxt-Aliase `#imports` und `#components` und
- * relative Pfade innerhalb des Pakets.
+ * Allowed are npm packages, the Nuxt aliases `#imports` and `#components`, and
+ * relative paths inside the package.
  */
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
-const QUELLE = 'app'
+const SOURCE = 'app'
 
-function quelldateien(): string[] {
-  const gefunden: string[] = []
+function sourceFiles(): string[] {
+  const found: string[] = []
 
-  function lauf(dir: string): void {
-    for (const eintrag of readdirSync(dir)) {
-      const pfad = join(dir, eintrag)
-      if (statSync(pfad).isDirectory()) { lauf(pfad); continue }
-      if (/\.(vue|ts)$/.test(eintrag)) gefunden.push(relative(ROOT, pfad))
+  function walk(dir: string): void {
+    for (const entry of readdirSync(dir)) {
+      const path = join(dir, entry)
+      if (statSync(path).isDirectory()) { walk(path); continue }
+      if (/\.(vue|ts)$/.test(entry)) found.push(relative(ROOT, path))
     }
   }
 
-  lauf(join(ROOT, QUELLE))
-  return gefunden.sort()
+  walk(join(ROOT, SOURCE))
+  return found.sort()
 }
 
-const DATEIEN = quelldateien()
+const FILES = sourceFiles()
 
-function importe(inhalt: string): string[] {
-  return [...inhalt.matchAll(/(?:from|import)\s*\(?\s*['"]([^'"]+)['"]/g)].map(m => m[1]!)
+function imports(content: string): string[] {
+  return [...content.matchAll(/(?:from|import)\s*\(?\s*['"]([^'"]+)['"]/g)].map(m => m[1]!)
 }
 
-/** Kommentarzeilen erklären die Regeln und sollen sie nicht auslösen. */
-function code(datei: string): string[] {
-  return readFileSync(join(ROOT, datei), 'utf8')
+/** Comment lines explain the rules and must not trip them. */
+function code(file: string): string[] {
+  return readFileSync(join(ROOT, file), 'utf8')
     .split('\n')
-    .filter(z => !/^\s*(\*|\/\/|\/\*)/.test(z))
+    .filter(line => !/^\s*(\*|\/\/|\/\*)/.test(line))
 }
 
-describe('BaseKit steht für sich', () => {
-  it('findet überhaupt Dateien', () => {
-    expect(DATEIEN.length).toBeGreaterThan(20)
+describe('BaseKit stands on its own', () => {
+  it('finds any files at all', () => {
+    expect(FILES.length).toBeGreaterThan(20)
   })
 
-  it('greift mit relativen Pfaden nur ins eigene Paket', () => {
-    const verstoesse: string[] = []
+  it('reaches only into its own package with relative paths', () => {
+    const offences: string[] = []
 
-    for (const datei of DATEIEN) {
-      for (const spez of importe(readFileSync(join(ROOT, datei), 'utf8'))) {
-        if (!spez.startsWith('.')) continue
+    for (const file of FILES) {
+      for (const spec of imports(readFileSync(join(ROOT, file), 'utf8'))) {
+        if (!spec.startsWith('.')) continue
 
-        const ziel = relative(ROOT, resolve(dirname(join(ROOT, datei)), spez))
-        if (ziel.startsWith('..') || !ziel.startsWith(QUELLE + '/')) {
-          verstoesse.push(`${datei} → ${spez}`)
+        const target = relative(ROOT, resolve(dirname(join(ROOT, file)), spec))
+        if (target.startsWith('..') || !target.startsWith(SOURCE + '/')) {
+          offences.push(`${file} → ${spec}`)
         }
       }
     }
 
-    expect(verstoesse).toEqual([])
+    expect(offences).toEqual([])
   })
 
-  it('hängt nur an Paketen, die in der package.json stehen', () => {
+  it('depends only on packages listed in package.json', () => {
     const pkg = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8'))
-    const erlaubt = new Set([
+    const allowed = new Set([
       ...Object.keys(pkg.dependencies ?? {}),
       ...Object.keys(pkg.peerDependencies ?? {}),
       'vue',
@@ -82,67 +82,67 @@ describe('BaseKit steht für sich', () => {
       '#components',
     ])
 
-    const fehlend = new Set<string>()
-    for (const datei of DATEIEN) {
-      for (const spez of importe(readFileSync(join(ROOT, datei), 'utf8'))) {
-        if (spez.startsWith('.') || spez.startsWith('node:')) continue
-        // Unterpfade wie `@tiptap/extension-link` zählen zum Paket selbst.
-        const paket = spez.startsWith('@') ? spez.split('/').slice(0, 2).join('/') : spez.split('/')[0]!
-        if (!erlaubt.has(paket) && !erlaubt.has(spez)) fehlend.add(`${datei} → ${spez}`)
+    const missing = new Set<string>()
+    for (const file of FILES) {
+      for (const spec of imports(readFileSync(join(ROOT, file), 'utf8'))) {
+        if (spec.startsWith('.') || spec.startsWith('node:')) continue
+        // Sub-paths like `@tiptap/extension-link` count towards the package itself.
+        const name = spec.startsWith('@') ? spec.split('/').slice(0, 2).join('/') : spec.split('/')[0]!
+        if (!allowed.has(name) && !allowed.has(spec)) missing.add(`${file} → ${spec}`)
       }
     }
 
-    expect([...fehlend]).toEqual([])
+    expect([...missing]).toEqual([])
   })
 
-  it('ruft kein vue-i18n auf — Beschriftungen kommen über useBaseKit()', () => {
-    const verstoesse = DATEIEN.filter((datei) => {
-      const zeilen = code(datei).join('\n')
-      return importe(zeilen).includes('vue-i18n') || /\buseI18n\s*\(/.test(zeilen)
+  it('never calls vue-i18n — labels arrive through useBaseKit()', () => {
+    const offences = FILES.filter((file) => {
+      const lines = code(file).join('\n')
+      return imports(lines).includes('vue-i18n') || /\buseI18n\s*\(/.test(lines)
     })
 
-    expect(verstoesse).toEqual([])
+    expect(offences).toEqual([])
   })
 
-  it('trägt keine Übersetzungsschlüssel im Quelltext', () => {
-    const verstoesse: string[] = []
+  it('carries no translation keys in its source', () => {
+    const offences: string[] = []
 
-    for (const datei of DATEIEN) {
-      for (const zeile of code(datei)) {
-        const treffer = zeile.match(/\bt\(\s*['"][a-z][a-z_]*\.[a-z_.]+['"]/)
-        if (treffer) verstoesse.push(`${datei}: ${treffer[0]}`)
+    for (const file of FILES) {
+      for (const line of code(file)) {
+        const hit = line.match(/\bt\(\s*['"][a-z][a-z_]*\.[a-z_.]+['"]/)
+        if (hit) offences.push(`${file}: ${hit[0]}`)
       }
     }
 
-    expect(verstoesse).toEqual([])
+    expect(offences).toEqual([])
   })
 
-  it('benutzt ausschließlich --basekit-* als eigene CSS-Token', () => {
-    const verstoesse: string[] = []
-    // Nur echte Custom Properties: einmal gelesen (`var(--x)`), einmal gesetzt
-    // (`--x:`). Ein BEM-Modifier wie `.basekit-upload--drag` ist keins und
-    // darf hier nicht anschlagen.
-    const gelesen = /var\(\s*(--[a-z][a-z0-9-]*)/g
-    const gesetzt = /(?:^|[;{\s])(--[a-z][a-z0-9-]*)\s*:/gm
-    const eigen = (name: string) => name.startsWith('--basekit-') || name.startsWith('--ui-')
+  it('uses only --basekit-* as its own CSS tokens', () => {
+    const offences: string[] = []
+    // Real custom properties only: read once (`var(--x)`), set once (`--x:`).
+    // A BEM modifier like `.basekit-upload--drag` is neither and must not
+    // trip this.
+    const read = /var\(\s*(--[a-z][a-z0-9-]*)/g
+    const written = /(?:^|[;{\s])(--[a-z][a-z0-9-]*)\s*:/gm
+    const own = (name: string) => name.startsWith('--basekit-') || name.startsWith('--ui-')
 
-    for (const datei of DATEIEN) {
-      const inhalt = readFileSync(join(ROOT, datei), 'utf8')
-      for (const regex of [gelesen, gesetzt]) {
-        for (const treffer of inhalt.matchAll(regex)) {
-          if (!eigen(treffer[1]!)) verstoesse.push(`${datei}: ${treffer[1]}`)
+    for (const file of FILES) {
+      const content = readFileSync(join(ROOT, file), 'utf8')
+      for (const regex of [read, written]) {
+        for (const hit of content.matchAll(regex)) {
+          if (!own(hit[1]!)) offences.push(`${file}: ${hit[1]}`)
         }
       }
     }
 
-    expect(verstoesse).toEqual([])
+    expect(offences).toEqual([])
   })
 
-  it('benennt jede Komponente mit dem BaseKit-Präfix', () => {
-    const falsch = DATEIEN
-      .filter(d => d.startsWith('app/components/') && d.endsWith('.vue'))
-      .filter(d => !/\/BaseKit[A-Z]\w*(\.global)?\.vue$/.test(d))
+  it('names every component with the BaseKit prefix', () => {
+    const wrong = FILES
+      .filter(f => f.startsWith('app/components/') && f.endsWith('.vue'))
+      .filter(f => !/\/BaseKit[A-Z]\w*(\.global)?\.vue$/.test(f))
 
-    expect(falsch).toEqual([])
+    expect(wrong).toEqual([])
   })
 })

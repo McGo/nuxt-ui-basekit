@@ -15,37 +15,36 @@ function render(props: Record<string, unknown> = {}) {
 }
 
 describe('BaseKitViewLink', () => {
-  it('führt zur Ansicht der bearbeiteten Sache', () => {
+  it('leads to the view of the thing being edited', () => {
     expect(render().find('a').attributes('href')).toBe('/trikipedia')
   })
 
-  it('nennt die Richtung, nicht das Ziel', () => {
-    // Fest verdrahtet wie beim Rücksprung: wer zwischen Bereichen wechselt,
-    // soll den Weg zur Ansicht nicht jedes Mal an einer anderen Beschriftung
-    // erkennen müssen.
+  it('names the direction, not the target', () => {
+    // Hard-wired like the back link: anyone moving between areas should not
+    // have to recognise the way to the view by a different label each time.
     expect(render().text()).toBe('View')
   })
 
-  it('öffnet in einem neuen Reiter, damit nichts Ungespeichertes verlorengeht', () => {
+  it('opens in a new tab so nothing unsaved is lost', () => {
     const a = render().find('a')
 
     expect(a.attributes('target')).toBe('_blank')
-    // `noopener`, weil ein fremder Reiter sonst auf das Formular zurückgreifen kann.
+    // `noopener`, because a foreign tab could otherwise reach back into the form.
     expect(a.attributes('rel')).toBe('noopener')
   })
 
-  it('bleibt im selben Reiter, wo das gewollt ist', () => {
+  it('stays in the same tab where that is wanted', () => {
     const a = render({ newTab: false }).find('a')
 
     expect(a.attributes('target')).toBeUndefined()
     expect(a.attributes('rel')).toBeUndefined()
   })
 
-  it('trägt ein Symbol, das den Wechsel nach außen andeutet', () => {
+  it('carries an icon hinting at the move outwards', () => {
     expect(render().find('a').attributes('data-icon')).toBe('i-lucide-external-link')
   })
 
-  it('nimmt eine eigene Beschriftung, wo „Ansehen" zu unbestimmt ist', () => {
+  it('takes its own label where "View" is too vague', () => {
     expect(render({ label: 'Zur Gruppenseite' }).text()).toBe('Zur Gruppenseite')
   })
 })

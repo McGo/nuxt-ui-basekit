@@ -33,7 +33,7 @@ describe('BaseKitStatTile', () => {
   })
 
   it('leaves a zero alone even with an alert tone', () => {
-    // „0 kaputte Videos" ist der Normalzustand und keine Warnung.
+    // "0 broken videos" is the normal state, not a warning.
     const wrapper = render({ tone: 'alert', value: 0 })
     expect(wrapper.find('[data-icon="i-lucide-alert-triangle"]').exists()).toBe(false)
     expect(wrapper.find('p.text-error').exists()).toBe(false)

@@ -1,12 +1,11 @@
 /**
- * Ersatz für Nuxts virtuelles `#imports` in Vitest.
+ * Stand-in for Nuxt's virtual `#imports` under Vitest.
  *
- * BaseKit holt sich von dort nur `useRoute` und `useRouter` — die Reiter
- * adressieren den aktiven Reiter über den URL-Hash. Mehr braucht das Paket
- * nicht, und mehr steht deshalb auch nicht hier.
+ * BaseKit only takes `useRoute` and `useRouter` from there — the tabs address
+ * the active tab through the URL fragment. The package needs no more than
+ * that, so no more than that is here.
  *
- * Ein Test, der ein bestimmtes Verhalten des Routers prüfen will, mockt das
- * Modul im Fall selbst.
+ * A test that wants particular router behaviour mocks the module itself.
  */
 import { ref, type Ref } from 'vue'
 

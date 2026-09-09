@@ -8,14 +8,16 @@ import { renderMarkdown } from '../utils/markdown'
 import { htmlToMarkdown, prepareHtmlToMarkdown } from '../utils/html-to-markdown'
 
 /**
- * WYSIWYG-Editor für den Text-Block. v-model ist ein **Markdown-String**.
+ * A WYSIWYG editor whose v-model is a **Markdown string**.
  *
- * Tiptap arbeitet intern mit HTML; die Brücke nach Markdown läuft über zwei
- * etablierte Bibliotheken statt eines Tiptap-Markdown-Plugins (versionsrobust):
- *   - Laden:    Markdown → HTML via markdown-it (`renderMarkdown`)
- *   - Speichern: HTML → Markdown via turndown
+ * Tiptap works in HTML internally. The bridge to Markdown runs through two
+ * established libraries rather than a Tiptap Markdown plugin, which survives
+ * version bumps better:
+ *   - loading: Markdown to HTML through markdown-it (`renderMarkdown`)
+ *   - saving:  HTML to Markdown through turndown
  *
- * Der Editor wird erst `onMounted` erzeugt (ProseMirror braucht DOM, SSR-sicher).
+ * The editor is created `onMounted` — ProseMirror needs a DOM, so this stays
+ * SSR-safe.
  */
 const props = defineProps<{ modelValue?: string | null }>()
 const emit = defineEmits<{ 'update:modelValue': [string] }>()
@@ -29,7 +31,7 @@ function toMarkdown(html: string): string {
 }
 
 onMounted(() => {
-  // turndown im Browser nachladen — Details in html-to-markdown.ts.
+  // Pull turndown in on the client — details in html-to-markdown.ts.
   prepareHtmlToMarkdown()
   editor.value = new Editor({
     extensions: [
@@ -43,7 +45,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => editor.value?.destroy())
 
-// Externe Wertänderung übernehmen, ohne den Cursor zu stören (nur bei echtem Diff).
+// Take an outside change without disturbing the cursor — only on a real diff.
 watch(() => props.modelValue, (v) => {
   if (!editor.value) return
   if ((v ?? '') !== toMarkdown(editor.value.getHTML())) {
@@ -102,7 +104,7 @@ function isActive(name: string, attrs?: Record<string, unknown>): boolean {
 .md-content :deep(.ProseMirror code) { font-family: ui-monospace, monospace; font-size: 0.85em; background: var(--basekit-surface-muted, #f4f6fa); padding: 0.1em 0.35em; border-radius: 4px; }
 .md-content :deep(.ProseMirror a) { color: var(--basekit-accent, #2563eb); text-decoration: underline; }
 
-/* Dark-Mode: die hart hinterlegten Light-Fallbacks überschreiben. */
+/* Dark mode: override the hard-coded light fallbacks. */
 :where(.dark) .md-editor { background: #101828; border-color: #1f2937; }
 :where(.dark) .md-toolbar { background: #0b1220; border-color: #1f2937; }
 :where(.dark) .md-toolbar button { color: #e5e7eb; }

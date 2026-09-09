@@ -1,22 +1,21 @@
 #!/usr/bin/env python3
-"""Nimmt jede Komponente aus dem Playground einzeln auf — hell und dunkel.
+"""Shoots every component from the playground on its own, light and dark.
 
-Voraussetzung: der Playground läuft.
+Requires the playground to be running:
 
     cd playground && npm run dev
     python3 scripts/shots.py
 
-Das Skript sucht im Schaubild nach Blöcken mit `data-shot` und legt für jeden
-zwei Dateien unter `docs/media/` ab. Wer eine Komponente hinzufügt, ergänzt im
-Playground einen Block — hier ist nichts nachzutragen.
+The script looks for blocks carrying `data-shot` and writes two files per block
+under `docs/media/`. Adding a component means adding a block in the playground —
+nothing to change here.
 
-Drei Komponenten zeigen geschlossen nur einen Knopf und wären als Aufnahme
-wertlos. Für sie steht unten eine kleine Liste: das Skript klickt sie auf und
-nimmt Auslöser und aufgeklappten Inhalt zusammen auf.
+Three components show nothing but a button while closed and would be worthless
+as a screenshot. They are listed in OPENED below: the script clicks them open
+and shoots the trigger together with the panel.
 """
 
 import sys
-import time
 from pathlib import Path
 
 from playwright.sync_api import sync_playwright
@@ -26,14 +25,14 @@ OUT = Path(__file__).resolve().parent.parent / "docs" / "media"
 WIDTH = 1100
 SCALE = 2
 
-# Komponenten, die erst im geöffneten Zustand etwas zeigen.
+# Components that only show something once opened.
 #
-# name: (Auslöser, Inhalt, mit_ausloeser)
+# name: (trigger, panel, with_trigger)
 #
-# `mit_ausloeser` entscheidet über den Ausschnitt. Beim Symbolwähler klappt der
-# Inhalt direkt unter dem Knopf auf — beide zusammen ergeben erst das Bild.
-# Die beiden Modale liegen mittig über der Seite, weit weg von ihrem Auslöser;
-# eine Vereinigung zöge den Ausschnitt über die halbe Seite.
+# `with_trigger` decides the crop. The icon picker opens right below its
+# button, and only both together make the picture. The two modals sit centred
+# over the page, far from their trigger; a union would drag the crop across
+# half the page.
 OPENED = {
     "BaseKitIconPicker": ('[data-shot="BaseKitIconPicker"] button', '[data-reka-popper-content-wrapper]', True),
     "BaseKitRecordPicker": ('[data-shot="BaseKitRecordPicker"] button', '[role="dialog"]', False),
@@ -51,7 +50,7 @@ def set_theme(page, dark: bool) -> None:
 
 
 def union(a: dict, b: dict) -> dict:
-    """Umschließendes Rechteck zweier Kästen, mit etwas Luft."""
+    """Bounding box of two rectangles, with a little air around it."""
     left = min(a["x"], b["x"]) - 12
     top = min(a["y"], b["y"]) - 12
     right = max(a["x"] + a["width"], b["x"] + b["width"]) + 12
@@ -73,10 +72,10 @@ def shoot_static(page, suffix: str) -> int:
 
 
 def isolate(page, keep: str | None) -> None:
-    """Blendet alle Blöcke bis auf einen aus.
+    """Hides every block but one.
 
-    Ohne das steht im Ausschnitt eines aufgeklappten Dialogs die halbe Seite
-    dahinter — gestrichelte Upload-Kästen, Pfeile, halbe Wörter am Rand.
+    Without this, the crop of an opened dialog carries half the page behind it
+    — dashed upload boxes, arrows, half-words at the edge.
     """
     page.evaluate(
         "(keep) => document.querySelectorAll('[data-shot]').forEach((el) => {"
@@ -94,7 +93,7 @@ def shoot_opened(page, suffix: str) -> int:
     for name, (trigger_sel, panel_sel, with_trigger) in OPENED.items():
         trigger = page.query_selector(trigger_sel)
         if trigger is None:
-            print(f"  ! kein Auslöser für {name} ({trigger_sel})")
+            print(f"  ! no trigger for {name} ({trigger_sel})")
             continue
         trigger.scroll_into_view_if_needed()
         page.wait_for_timeout(120)
@@ -102,19 +101,19 @@ def shoot_opened(page, suffix: str) -> int:
         try:
             page.wait_for_selector(panel_sel, state="visible", timeout=3000)
         except Exception:
-            print(f"  ! {name} klappt nicht auf")
+            print(f"  ! {name} does not open")
             page.keyboard.press("Escape")
             continue
         page.wait_for_timeout(400)
-        # Der Suchschlitz zieht beim Öffnen den Fokus und trägt dann einen
-        # grünen Ring. Im Bild sieht das nach Fehlermeldung aus.
+        # The search field takes focus on open and then wears a green ring.
+        # In a screenshot that reads like an error.
         page.evaluate("() => document.activeElement instanceof HTMLElement && document.activeElement.blur()")
         page.wait_for_timeout(150)
 
         panel = page.query_selector(panel_sel)
         box = panel.bounding_box()
         if with_trigger:
-            # Nur der eigene Block bleibt stehen, der Rest verschwindet.
+            # Only this block stays standing, the rest disappears.
             isolate(page, name)
             page.wait_for_timeout(120)
             trigger_box = trigger.bounding_box()
@@ -141,8 +140,8 @@ def main() -> int:
             device_scale_factor=SCALE,
         )
         page.goto(URL, wait_until="networkidle")
-        # Der Markdown-Editor und die Diagramme bauen sich erst nach der
-        # Hydration auf — ohne diese Pause landen leere Kästen in den Bildern.
+        # The Markdown editor and the charts only build themselves after
+        # hydration — without this pause, empty boxes end up in the images.
         page.wait_for_timeout(2000)
 
         total = 0
@@ -152,11 +151,11 @@ def main() -> int:
             print(f"{suffix}:")
             n = shoot_static(page, suffix)
             m = shoot_opened(page, suffix)
-            print(f"  {n} statisch, {m} aufgeklappt")
+            print(f"  {n} static, {m} opened")
             total += n + m
 
         browser.close()
-    print(f"\n{total} Aufnahmen unter {OUT}")
+    print(f"\n{total} screenshots under {OUT}")
     return 0
 
 

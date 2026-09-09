@@ -2,17 +2,17 @@ import { computed } from 'vue'
 import { useBaseKit } from './useBaseKit'
 
 /**
- * Reihenfarben und Zahlenformate für die `BaseKitChart*`-Komponenten.
+ * Series colours and number formats for the `BaseKitChart*` components.
  *
- * Die Farben stehen als CSS-Variablen in `main.css` und sind als **Satz**
- * geprüft — Reihenfolge inklusive. Deshalb gibt es hier nur einen Zugriff per
- * Index und keine Erzeugung: eine sechste Farbe wäre unter einer
- * Farbfehlsichtigkeit von einer der fünf nicht mehr zu unterscheiden.
- * Wer mehr Reihen hat, fasst zusammen.
+ * The colours live as CSS variables in `app/assets/css/basekit.css` and are
+ * validated as a **set**, order included. That is why there is lookup by index
+ * here and no generation: a sixth colour would be indistinguishable from one
+ * of the five under a colour vision deficiency. More series than that means
+ * grouping them.
  */
 export const BASEKIT_CHART_SLOTS = 5
 
-/** Farbe für Reihe `index` (0-basiert). Ab Slot 6 die zurückgenommene Graustufe. */
+/** Colour for series `index`, zero-based. From slot 6 on, the muted grey. */
 export function baseKitChartColor(index: number): string {
   return index < BASEKIT_CHART_SLOTS
     ? `var(--basekit-chart-${index + 1})`
@@ -33,7 +33,7 @@ export function useChartFormat(): {
     return new Intl.NumberFormat(locale.value).format(value)
   }
 
-  /** Für Werte an Marken und in Kacheln: 12.400 → 12,4 Tsd. */
+  /** For values on ticks and in tiles: 12,400 becomes 12.4K. */
   function compact(value: number): string {
     return value < 10000
       ? number(value)
@@ -41,9 +41,9 @@ export function useChartFormat(): {
   }
 
   /**
-   * Anteil in Prozent. Abgerundet, solange nicht alles erreicht ist — sonst
-   * würde 9.999 von 10.000 als „100 %" durchgehen und die eine fehlende
-   * Übersetzung wäre weggerundet.
+   * A share in percent, rounded down as long as the whole has not been
+   * reached — otherwise 9,999 out of 10,000 would pass as "100%" and the one
+   * missing item would be rounded out of sight.
    */
   function percent(value: number, total: number): string {
     if (total <= 0) return '—'
@@ -61,8 +61,8 @@ export function useChartFormat(): {
   }
 
   /**
-   * Dezimalpräfixe (kB, MB, GB) — nicht KiB/MiB. Speicheranbieter rechnen so
-   * ab, und die Zahl soll zu der auf der Rechnung passen.
+   * Decimal prefixes (kB, MB, GB), not KiB/MiB. Storage is billed that way,
+   * and the number here should match the one on the invoice.
    */
   function bytes(value: number): string {
     const units = ['B', 'kB', 'MB', 'GB', 'TB']
@@ -76,7 +76,7 @@ export function useChartFormat(): {
     return `${new Intl.NumberFormat(locale.value, { maximumFractionDigits: digits }).format(size)} ${units[unit]}`
   }
 
-  /** Laufzeit als „14 h 20 min", unter einer Stunde nur Minuten. */
+  /** Runtime as "14 h 20 min"; below an hour, minutes only. */
   function duration(seconds: number): string {
     const total = Math.max(0, Math.round(seconds / 60))
     const hours = Math.floor(total / 60)

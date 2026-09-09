@@ -2,8 +2,8 @@ import { describe, expect, it } from 'vitest'
 import { mount } from '@vue/test-utils'
 import BaseKitRecordPicker from '../app/components/BaseKitRecordPicker.vue'
 
-// UModal-Stub rendert den #body-Slot immer (open wird ignoriert), damit die
-// Liste im Test inspizierbar ist.
+// The UModal stub always renders the #body slot, ignoring `open`, so the list
+// can be inspected in the test.
 const UModal = { props: ['open', 'title'], template: '<div class="u-modal"><slot name="body" /></div>' }
 const UButton = { template: '<button class="u-btn"><slot /></button>' }
 const UInput = {

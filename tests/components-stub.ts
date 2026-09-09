@@ -1,10 +1,10 @@
 /**
- * Ersatz für Nuxts virtuelles `#components` in Vitest.
+ * Stand-in for Nuxt's virtual `#components` under Vitest.
  *
- * `BaseKitDataTable` importiert `NuxtLink` von dort als Komponente, nicht als
- * Name. Damit greift ein `global.stubs.NuxtLink` im Test nicht mehr — der
- * Ersatz muss hier stehen und sich wie ein Link verhalten, sonst prüfen die
- * Tests etwas anderes, als die Anwendung rendert.
+ * `BaseKitDataTable` imports `NuxtLink` from there as a component, not as a
+ * name. A `global.stubs.NuxtLink` in the test therefore no longer applies —
+ * the replacement has to live here and behave like a link, otherwise the tests
+ * check something other than what the application renders.
  */
 import { defineComponent, h } from 'vue'
 

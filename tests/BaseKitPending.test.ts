@@ -16,40 +16,40 @@ function render(props: Record<string, unknown> = {}, slot = '<p class="inhalt">F
 }
 
 describe('BaseKitPending', () => {
-  it('zeigt den Kreisel statt des Inhalts, solange geladen wird', () => {
+  it('shows the spinner instead of the content while loading', () => {
     const w = render({ pending: true })
 
     expect(w.find('[data-icon="i-lucide-loader-circle"]').exists()).toBe(true)
     expect(w.find('.inhalt').exists()).toBe(false)
   })
 
-  it('gibt den Inhalt frei, sobald die Daten stehen', () => {
+  it('releases the content once the data is in', () => {
     const w = render({ pending: false })
 
     expect(w.find('.inhalt').exists()).toBe(true)
     expect(w.find('[data-icon="i-lucide-loader-circle"]').exists()).toBe(false)
   })
 
-  it('wartet ohne Angabe — die Daten sind eher noch nicht da als schon', () => {
-    // Der Standard entscheidet, was ein vergessenes Prop bewirkt. Lieber ein
-    // Kreisel zu viel als ein leeres Formular, das nach „nichts da" aussieht.
+  it('waits when nothing is passed — data is more likely absent than present', () => {
+    // The default decides what a forgotten prop does. One spinner too many
+    // beats an empty form that looks like "nothing here".
     expect(render().find('[data-icon="i-lucide-loader-circle"]').exists()).toBe(true)
   })
 
-  it('nennt den Vorgang nur, wenn er einen Namen hat', () => {
+  it('names the operation only when it has a name', () => {
     expect(render({ pending: true }).text()).toBe('')
     expect(render({ pending: true, label: 'Suche läuft' }).text()).toBe('Suche läuft')
   })
 
-  it('meldet sich als Statusbereich an, damit Vorlesesoftware es mitbekommt', () => {
+  it('announces itself as a status region so screen readers pick it up', () => {
     const box = render({ pending: true }).find('[role="status"]')
 
     expect(box.exists()).toBe(true)
     expect(box.attributes('aria-live')).toBe('polite')
   })
 
-  it('hält für eine ganze Seite mehr Höhe frei als für einen Abschnitt', () => {
-    // Ohne Mindesthöhe springt das Layout, sobald der Inhalt erscheint.
+  it('reserves more height for a whole page than for a section', () => {
+    // Without a minimum height the layout jumps once the content appears.
     expect(render({ pending: true, size: 'page' }).find('[role="status"]').classes()).toContain('min-h-64')
     expect(render({ pending: true, size: 'inline' }).find('[role="status"]').classes()).toContain('min-h-24')
   })

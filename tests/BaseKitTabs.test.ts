@@ -23,8 +23,9 @@ function render(props: Record<string, unknown> = {}) {
 }
 
 describe('BaseKitTabs', () => {
-  // Zwei Fälle setzen `useRoute` dauerhaft (mehrere Renders je Fall) — danach
-  // zurück auf den Default aus `tests/setup.ts`, sonst blutet der Hash aus.
+  // Two cases set `useRoute` permanently, because they render several times.
+  // Reset to the default from `tests/setup.ts` afterwards, or the hash bleeds
+  // into the next case.
   afterEach(() => {
     vi.mocked(useRoute).mockReturnValue({ path: '/', params: {}, query: {}, hash: '' } as never)
   })
@@ -66,8 +67,8 @@ describe('BaseKitTabs', () => {
     expect(w.find('.p-notifications').exists()).toBe(true)
   })
 
-  // Der Hash greift erst nach dem Mount (der Server sieht ihn nicht) — deshalb
-  // hier ein Tick, bevor geprüft wird.
+  // The hash only applies after mount — the server never sees it — so give it
+  // a tick before checking.
   it('activates the tab from the URL hash when hashNav is on', async () => {
     vi.mocked(useRoute).mockReturnValueOnce({ path: '/', params: {}, query: {}, hash: '#access' } as never)
     const w = render({ hashNav: true })
@@ -76,22 +77,22 @@ describe('BaseKitTabs', () => {
     expect(w.find('.p-general').exists()).toBe(false)
   })
 
-  it('rendert zuerst wie der Server und wechselt erst danach auf den Hash-Tab', () => {
+  it('first renders like the server and only then switches to the hash tab', () => {
     vi.mocked(useRoute).mockReturnValueOnce({ path: '/', params: {}, query: {}, hash: '#access' } as never)
-    // Ohne Tick: der erste Render muss dem Server entsprechen, sonst zerlegt
-    // es die Hydration (Markierung auf dem einen, Inhalt vom anderen Tab).
+    // Without a tick: the first render has to match the server, otherwise
+    // hydration tears apart — marker on one tab, content from the other.
     const w = render({ hashNav: true })
     expect(w.find('.p-general').exists()).toBe(true)
   })
 
-  it('meldet den Tab aus dem Hash ans v-model', async () => {
+  it('reports the tab from the hash to the v-model', async () => {
     vi.mocked(useRoute).mockReturnValueOnce({ path: '/', params: {}, query: {}, hash: '#access' } as never)
     const w = render({ hashNav: true })
     await nextTick()
     expect(w.emitted('update:modelValue')!.at(-1)![0]).toBe('access')
   })
 
-  it('markiert Reiter und Inhalt gleich, wenn der Hash greift', async () => {
+  it('marks tab and content alike once the hash applies', async () => {
     vi.mocked(useRoute).mockReturnValueOnce({ path: '/', params: {}, query: {}, hash: '#access' } as never)
     const w = render({ hashNav: true })
     await nextTick()
@@ -101,10 +102,10 @@ describe('BaseKitTabs', () => {
     expect(w.find('[role="tabpanel"]').attributes('aria-labelledby')).toBe('basekit-tab-access')
   })
 
-  it('übernimmt den Hash-Tab auch, wenn er erst später dazukommt', async () => {
+  it('takes the hash tab even when it only appears later', async () => {
     vi.mocked(useRoute).mockReturnValue({ path: '/', params: {}, query: {}, hash: '#access' } as never)
-    // Rechte-abhängige Tabs kommen mit dem Bootstrap nach — anfangs fehlt der
-    // Tab aus dem Hash noch.
+    // Permission-dependent tabs arrive late, so the tab named in the hash is
+    // missing at first.
     const w = render({ hashNav: true, items: items.slice(0, 2) })
     await nextTick()
     expect(w.find('.p-general').exists()).toBe(true)
@@ -114,7 +115,7 @@ describe('BaseKitTabs', () => {
     expect(w.find('.p-access').exists()).toBe(true)
   })
 
-  it('lässt eine getroffene Wahl stehen, wenn später Tabs dazukommen', async () => {
+  it('leaves a made choice alone when tabs arrive later', async () => {
     vi.mocked(useRoute).mockReturnValue({ path: '/', params: {}, query: {}, hash: '#access' } as never)
     const w = render({ hashNav: true, items: items.slice(0, 2) })
     await w.findAll('[role="tab"]')[1]!.trigger('click')

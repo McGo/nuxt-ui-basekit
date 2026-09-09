@@ -1,12 +1,11 @@
 <script setup lang="ts">
 /**
- * Waagerechte Balken für nominale Kategorien — Rollen, Typen, Herkünfte.
+ * Horizontal bars for nominal categories — roles, types, sources.
  *
- * Waagerecht, weil die Beschriftung aus Namen besteht und Namen unter einer
- * senkrechten Säule schräg gestellt werden müssten. Alle Balken tragen
- * **dieselbe** Farbe: die Kategorien haben keine eigene Ordnung, und ein
- * Farbverlauf nach Größe würde die Länge ein zweites Mal erzählen, statt eine
- * neue Auskunft zu geben.
+ * Horizontal because the labels are names, and names under a vertical column
+ * would have to be tilted. Every bar carries the **same** colour: the
+ * categories have no order of their own, and a gradient by size would tell the
+ * length a second time instead of adding anything.
  */
 import { computed, ref } from 'vue'
 import { baseKitChartColor, useChartFormat } from '../../composables/useChartPalette'
@@ -19,7 +18,7 @@ interface BarItem {
 
 const props = withDefaults(defineProps<{
   items: BarItem[]
-  /** Sichtbare Zeilen; der Rest wandert in „Weitere". */
+  /** Rows shown; the rest is folded into a "more" row. */
   limit?: number
   moreLabel?: string
   emptyLabel?: string
@@ -65,8 +64,8 @@ const color = baseKitChartColor(0)
       >
         <span class="truncate text-sm text-muted" :title="row.label">{{ row.label }}</span>
 
-        <!-- Die Spur ist die Fläche, der Balken die Aussage; deshalb trägt die
-             Spur nur eine Andeutung und keine zweite Farbe. -->
+        <!-- The track is the surface, the bar is the statement; which is why
+             the track only hints and carries no second colour. -->
         <span class="h-2.5 w-full rounded-full bg-elevated">
           <span
             class="block h-2.5 rounded-full transition-opacity"

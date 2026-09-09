@@ -30,7 +30,7 @@ describe('BaseKitChartColumns', () => {
   it('assigns colours by series order, not by size', () => {
     const paths = render().findAll('path[fill^="var(--basekit-chart-"]')
     const colours = paths.map(p => p.attributes('fill'))
-    // Die kleinere Reihe am dritten Tag behält ihre Farbe aus der Reihenfolge.
+    // The smaller series on day three keeps the colour its position gives it.
     expect(colours).toEqual([
       'var(--basekit-chart-1)',
       'var(--basekit-chart-2)',
@@ -75,8 +75,8 @@ describe('BaseKitChartColumns', () => {
     const wrapper = render({
       series: [{ key: 'a', label: 'A', points: [37, 12, 4] }],
     })
-    // 37 rundet auf 50, nicht auf 37 — sonst trägt die Gitterlinie keinen
-    // ablesbaren Wert.
+    // 37 rounds up to 50, not to 37 — otherwise the grid line carries no
+    // readable value.
     expect(wrapper.findAll('text').map(t => t.text())).toContain('50')
   })
 
@@ -96,8 +96,8 @@ describe('BaseKitChartColumns', () => {
         series: [{ key: 'a', label: 'A', points: many.map(() => 1) }],
       },
     })
-    // Bei 30 Tagen auf 640 px Standardbreite darf nicht jeder Tag beschriftet
-    // werden; die Ticks der Y-Achse (3) kommen dazu.
+    // With 30 days at the default width of 640px not every day may be
+    // labelled; the three y-axis ticks come on top.
     const rendered = wrapper.findAll('text').filter(t => t.attributes('text-anchor') === 'middle')
     expect(rendered.length).toBeLessThan(30)
     expect(rendered.length).toBeGreaterThan(0)

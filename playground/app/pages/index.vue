@@ -1,15 +1,15 @@
 <script setup lang="ts">
 /**
- * Schaubild aller Komponenten — Grundlage für die Aufnahmen in COMPONENTS.md.
+ * Every component on one page — the source of the screenshots in COMPONENTS.md.
  *
- * Jeder Block trägt ein `data-shot` mit dem Komponentennamen. Das Skript unter
- * `scripts/shots.mjs` sucht genau danach und nimmt jeden Block einzeln auf,
- * hell und dunkel. Wer eine Komponente hinzufügt, ergänzt hier einen Block und
- * bekommt die Aufnahme ohne weiteres Zutun.
+ * Each block carries a `data-shot` with the component name. `scripts/shots.py`
+ * looks for exactly that and shoots every block on its own, light and dark.
+ * Adding a component means adding a block here; the screenshot follows without
+ * further work.
  *
- * Die Beispieldaten sind erfunden, aber nicht beliebig: sie sollen zeigen,
- * wofür die Komponente gedacht ist. Eine Tabelle mit `foo`/`bar` erklärt
- * niemandem etwas.
+ * The sample data is made up but not arbitrary: it should show what the
+ * component is for. A table full of `foo` and `bar` explains nothing to
+ * anybody.
  */
 import type { BaseKitDataColumn } from 'nuxt-ui-basekit/app/components/BaseKitDataTable.vue'
 
@@ -195,9 +195,9 @@ async function askSomething(): Promise<void> {
 </template>
 
 <style>
-/* Aufnahmeflächen bekommen einen eigenen Grund. Ein Element-Screenshot ohne
-   Hintergrund wird sonst transparent und sieht auf GitHub je nach Theme
-   zufällig aus. */
+/* Shot areas get a ground of their own. An element screenshot without a
+   background comes out transparent and then looks accidental on GitHub,
+   depending on the theme. */
 .shot {
   background: var(--ui-bg);
   padding: 1.5rem;

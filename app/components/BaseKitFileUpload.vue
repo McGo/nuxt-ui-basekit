@@ -3,9 +3,9 @@ import { ref } from 'vue'
 import { useBaseKitLabels } from '../composables/useBaseKit'
 
 /**
- * Datei-Auswahl per Klick oder Drag & Drop. Reicht die ausgewählten Dateien
- * über `select` nach oben — kümmert sich NICHT selbst um den Upload (das macht
- * der Aufrufer, je nach Bild/Video unterschiedlich).
+ * File selection by click or drag and drop. Hands the chosen files up through
+ * `select` and does NOT upload them itself — that stays with the caller, who
+ * knows whether this is an image or a video.
  */
 const props = withDefaults(defineProps<{
   accept?: string
@@ -31,7 +31,7 @@ function pick(): void {
 function onChange(event: Event): void {
   const files = Array.from((event.target as HTMLInputElement).files ?? [])
   if (files.length) emit('select', files)
-  // Zurücksetzen, damit dieselbe Datei erneut gewählt werden kann.
+  // Reset, so the same file can be picked again.
   if (input.value) input.value.value = ''
 }
 
@@ -84,7 +84,7 @@ function onDrop(event: DragEvent): void {
 .basekit-upload__icon { font-size: 1.5rem; }
 .basekit-upload__label { font-size: 0.8125rem; font-weight: 500; }
 
-/* Dark-Mode: die Light-Fallbacks des Dropfelds überschreiben. */
+/* Dark mode: override the drop zone's light fallbacks. */
 :where(.dark) .basekit-upload { border-color: #1f2937; background: #0f172a; color: #9ca3af; }
 :where(.dark) .basekit-upload:hover, :where(.dark) .basekit-upload--drag { background: #1f2937; }
 </style>

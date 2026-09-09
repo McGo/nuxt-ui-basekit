@@ -4,22 +4,22 @@ import { useBaseKitLabels } from '../composables/useBaseKit'
 import { NuxtLink } from '#components'
 
 /**
- * Wiederverwendbare Admin-Tabelle: sortierbare Spalten, Textfilter und ein
- * „Anlegen"-Button oben rechts. Client-seitig (Daten werden übergeben).
+ * A reusable admin table: sortable columns, a text filter and a create button
+ * top right. Client-side throughout — the rows are handed in.
  *
- * - `columns` definiert Spalten; `sortable` macht den Kopf klickbar.
- * - Zellen rendern per Default `row[key]`; überschreibbar via Slot
+ * - `columns` defines the columns; `sortable` makes a header clickable.
+ * - Cells render `row[key]` by default, overridable through the slot
  *   `#cell-<key>="{ row, value }"`.
- * - Zeilen-Aktionen über den Slot `#actions="{ row }"` (rechte Spalte).
- * - `row-link` macht die Namensspalte anklickbar: die Funktion bekommt die
- *   Zeile und gibt ihr Ziel zurück (oder `null`, wenn diese Zeile keins hat).
- *   Welche Spalte den Link trägt, sagt `link-column` — ohne Angabe die erste.
- * - Zusätzliche Filter über den Slot `#toolbar` (rechts neben der Suche).
- * - „Anlegen": `create-label` + `@create` rendert den Button oben rechts.
- * - Paginierung client-seitig: Seitengröße über `page-size` /
- *   `page-size-options` (Default 25; Auswahl 10/25/50/100/250/Alle).
+ * - Row actions go into the slot `#actions="{ row }"`, the rightmost column.
+ * - `row-link` makes the name column clickable: the function receives the row
+ *   and returns its target, or `null` where that row has none. Which column
+ *   carries the link is `link-column`; without it, the first.
+ * - Extra filters go into the slot `#toolbar`, right of the search field.
+ * - `create-label` plus `@create` renders the button top right.
+ * - Pagination is client-side: `page-size` and `page-size-options` (default
+ *   25, offering 10/25/50/100/250/all).
  *
- * Generisch über den Zeilentyp `T` — Slots liefern `row` typisiert zurück.
+ * Generic over the row type `T` — slots hand `row` back typed.
  */
 export interface BaseKitDataColumn {
   key: string
@@ -29,7 +29,7 @@ export interface BaseKitDataColumn {
   class?: string
 }
 
-/** Seitengröße: feste Zeilenzahl oder `'all'` für „ohne Limit". */
+/** Page size: a fixed number of rows, or `'all'` for no limit. */
 export type BaseKitPageSize = number | 'all'
 
 const props = withDefaults(defineProps<{
@@ -37,23 +37,23 @@ const props = withDefaults(defineProps<{
   rows: T[]
   rowKey?: string
   searchable?: boolean
-  /** Felder, die die Suche durchsucht (Default: alle Spalten-Keys). */
+  /** Fields the search looks through. Defaults to every column key. */
   searchKeys?: string[]
   searchPlaceholder?: string
   createLabel?: string
   loading?: boolean
   emptyLabel?: string
-  /** Anfangs gewählte Seitengröße. */
+  /** Page size selected initially. */
   pageSize?: BaseKitPageSize
-  /** Auswahlmöglichkeiten für die Seitengröße. */
+  /** The page sizes on offer. */
   pageSizeOptions?: BaseKitPageSize[]
   /**
-   * Ziel je Zeile. Gesetzt, macht es den Namen anklickbar — der Weg, den man
-   * zuerst probiert. Die Aktionsspalte bleibt trotzdem: sie zeigt, was es
-   * außer „öffnen" noch gibt.
+   * Target per row. Set, it makes the name clickable — the route people try
+   * first. The actions column stays regardless: it shows what there is besides
+   * opening.
    */
   rowLink?: (row: T) => string | null | undefined
-  /** Spalte, die den Link trägt. Ohne Angabe die erste. */
+  /** The column carrying the link. Without it, the first. */
   linkColumn?: string
 }>(), {
   rowKey: 'id',
@@ -75,7 +75,7 @@ const sortDir = ref<'asc' | 'desc'>('asc')
 
 const searchFields = computed(() => props.searchKeys ?? props.columns.map(c => c.key))
 
-/** Die verlinkte Spalte — explizit gesetzt oder die erste. */
+/** The linked column — explicitly set, or the first. */
 const linkKey = computed(() => props.linkColumn ?? props.columns[0]?.key ?? null)
 
 function rowTarget(row: T, key: string): string | null {
@@ -84,7 +84,7 @@ function rowTarget(row: T, key: string): string | null {
   return target || null
 }
 
-/** Wert einer Zelle — internes String-Indexing über den generischen Zeilentyp. */
+/** Value of a cell — internal string indexing over the generic row type. */
 function cell(row: T, key: string): unknown {
   return (row as Record<string, unknown>)[key]
 }
@@ -107,7 +107,7 @@ const displayed = computed<T[]>(() => {
   return [...filtered.value].sort((a, b) => compare(cell(a, key), cell(b, key)) * dir)
 })
 
-// — Paginierung ------------------------------------------------------------
+// — Pagination -------------------------------------------------------------
 const page = ref(1)
 const pageSize = ref<BaseKitPageSize>(props.pageSize)
 
@@ -136,12 +136,12 @@ const pageSizeItems = computed(() =>
   })),
 )
 
-// Suche oder Seitengröße geändert → zurück auf Seite 1.
+// Search or page size changed, so go back to page 1.
 watch([search, pageSize], () => {
   page.value = 1
 })
 
-// Datenbestand geschrumpft (z. B. Filter) → Seite in gültigen Bereich klemmen.
+// The data shrank, through a filter say, so clamp the page into range.
 watch(totalPages, (pages) => {
   if (page.value > pages) page.value = pages
 })
@@ -176,7 +176,7 @@ function sortIcon(col: BaseKitDataColumn): string | null {
 
 <template>
   <div class="space-y-4">
-    <!-- Toolbar: Suche links, Filter/Anlegen rechts -->
+    <!-- Toolbar: search on the left, filters and create on the right -->
     <div v-if="searchable || $slots.toolbar || createLabel" class="flex flex-wrap items-center justify-between gap-3">
       <UInput
         v-if="searchable"
@@ -195,7 +195,7 @@ function sortIcon(col: BaseKitDataColumn): string | null {
       </div>
     </div>
 
-    <!-- Zustände -->
+    <!-- States -->
     <div v-if="loading" class="py-12 text-center text-muted">
       <UIcon name="i-lucide-loader-2" class="size-6 animate-spin" />
     </div>
@@ -209,7 +209,7 @@ function sortIcon(col: BaseKitDataColumn): string | null {
       </slot>
     </div>
 
-    <!-- Tabelle -->
+    <!-- Table -->
     <table v-else class="w-full text-sm">
       <thead class="border-b border-neutral-200 text-left text-muted dark:border-neutral-800">
         <tr>
@@ -268,7 +268,7 @@ function sortIcon(col: BaseKitDataColumn): string | null {
       </tbody>
     </table>
 
-    <!-- Fußzeile: Seitengröße links, Bereich + Blättern rechts -->
+    <!-- Footer: page size on the left, range and paging on the right -->
     <div
       v-if="!loading && displayed.length"
       class="flex flex-wrap items-center justify-between gap-3 pt-1 text-sm text-muted"
