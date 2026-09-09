@@ -1,0 +1,86 @@
+/* ==========================================================================
+ * BaseKit — Gestaltungs-Token
+ *
+ * Die Komponenten greifen ausschließlich auf `--basekit-*` zu und nie auf
+ * Variablen einer bestimmten Anwendung. Hier stehen die Voreinstellungen.
+ *
+ * Eine Anwendung mit eigenem Theme legt die Token an einer Stelle auf ihre
+ * eigenen Variablen — ein Block in ihrem Stylesheet, geladen nach diesem:
+ *
+ *   :root {
+ *     --basekit-accent: var(--meine-markenfarbe, #2563eb);
+ *     --basekit-surface: var(--meine-kartenflaeche, #ffffff);
+ *   }
+ *
+ * Fällt der Block weg, rendern die Komponenten in den Werten von hier weiter.
+ * ========================================================================== */
+
+:root {
+  --basekit-surface: #ffffff;
+  --basekit-surface-muted: #f4f6fa;
+  --basekit-border: #e5e8ee;
+  --basekit-border-strong: #d6dbe4;
+  --basekit-text: #101828;
+  --basekit-text-muted: #667085;
+  --basekit-accent: #2563eb;
+  --basekit-accent-text: #ffffff;
+  --basekit-chrome: #0b2239;
+  --basekit-chrome-text: rgb(255 255 255 / 82%);
+}
+
+.dark {
+  --basekit-surface: #101828;
+  --basekit-surface-muted: #0b1220;
+  --basekit-border: #1f2937;
+  --basekit-border-strong: #374151;
+  --basekit-text: #e5e7eb;
+  --basekit-text-muted: #9ca3af;
+}
+
+/* --------------------------------------------------------------------------
+ * Diagramm-Farben (BaseKitChart*)
+ *
+ * Bewusst **nicht** aus der Markenfarbe abgeleitet. Ein Theme darf jede
+ * Akzentfarbe tragen — vier davon nebeneinander in einer gestapelten Fläche
+ * ergäben Reihen, die man nicht mehr auseinanderhält, und bei einer
+ * Rot-Grün-Schwäche gar nichts mehr. Die fünf Reihenfarben stehen deshalb
+ * fest und sind gegen die Kartenfläche geprüft (Lichtheitsband, Chroma,
+ * CVD-Abstand ΔE ≥ 8 zwischen Nachbarn, Normalsicht ΔE ≥ 15).
+ *
+ * Reihenfolge ist Teil der Prüfung: wer sie umsortiert oder eine sechste
+ * Farbe dazustellt, muss neu messen. Über fünf Reihen fasst die Übersicht
+ * zusammen, statt eine Farbe zu erfinden.
+ *
+ * Ein Kundenprojekt darf die Werte überschreiben — dann aber bitte als
+ * geprüften Satz und nicht einzeln.
+ * ------------------------------------------------------------------------ */
+:root {
+  --basekit-chart-1: #2a78d6;
+  --basekit-chart-2: #eb6834;
+  --basekit-chart-3: #1baf7a;
+  --basekit-chart-4: #eda100;
+  --basekit-chart-5: #e87ba4;
+
+  /* Die Fläche, in der ein Diagramm sitzt. Trägt die 2-px-Lücke zwischen
+   * gestapelten Segmenten und den Ring um Punkte — deshalb muss sie der
+   * Kartenfarbe entsprechen und nicht „irgendwie weiß" sein. */
+  --basekit-chart-surface: var(--ui-bg, #ffffff);
+  --basekit-chart-grid: rgb(0 0 0 / 8%);
+  --basekit-chart-axis: rgb(0 0 0 / 18%);
+  /* Zurückgenommene Reihe: Kontext, nicht Aussage. */
+  --basekit-chart-muted: rgb(0 0 0 / 22%);
+}
+
+.dark {
+  --basekit-chart-1: #3987e5;
+  --basekit-chart-2: #d95926;
+  --basekit-chart-3: #199e70;
+  --basekit-chart-4: #c98500;
+  --basekit-chart-5: #d55181;
+
+  --basekit-chart-surface: var(--ui-bg, #1e293b);
+  --basekit-chart-grid: rgb(255 255 255 / 10%);
+  --basekit-chart-axis: rgb(255 255 255 / 22%);
+  --basekit-chart-muted: rgb(255 255 255 / 28%);
+}
+

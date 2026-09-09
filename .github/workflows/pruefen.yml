@@ -1,0 +1,30 @@
+# Prüf-Gate für den BaseKit-Layer.
+#
+# Der Layer wird als Rohquelle ausgeliefert — Nuxt kompiliert im Konsumenten.
+# Es gibt deshalb keinen Build-Schritt, nur Typprüfung und Tests.
+# `nuxi prepare` muss vorlaufen, sonst fehlt die .nuxt/tsconfig.json und
+# weder Typecheck noch Tests finden ihre Typen.
+
+name: pruefen
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_call:
+
+jobs:
+  pruefen:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+      - run: npm run dev:prepare
+      - run: npm run lint
+      - run: npm test

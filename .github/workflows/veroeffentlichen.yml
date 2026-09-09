@@ -1,0 +1,53 @@
+# Veröffentlichung nach npmjs.com.
+#
+# Ausgelöst durch einen Tag `vX.Y.Z`. Die Version kommt aus der package.json;
+# der Tag muss dazu passen, sonst bricht der Job ab. Das hält Tag, Repo-Stand
+# und Registry auf derselben Zahl — anders als beim früheren
+# `-latest.<Pipeline>`-Schema, das aus dem Fehlen von Tags entstanden ist.
+#
+# Ablauf für eine neue Fassung:
+#   npm version patch|minor|major   # hebt package.json und setzt den Tag
+#   git push --follow-tags
+#
+# `id-token: write` erlaubt npm, eine Provenance-Attestierung mitzuliefern:
+# auf npmjs steht dann nachprüfbar, aus welchem Commit das Paket gebaut wurde.
+
+name: veroeffentlichen
+
+on:
+  push:
+    tags: ['v*']
+
+jobs:
+  pruefen:
+    uses: ./.github/workflows/pruefen.yml
+
+  veroeffentlichen:
+    needs: pruefen
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+
+      - name: Tag gegen package.json prüfen
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          PKG=$(node -p "require('./package.json').version")
+          if [ "$TAG" != "$PKG" ]; then
+            echo "Tag v$TAG und package.json $PKG laufen auseinander." >&2
+            exit 1
+          fi
+          echo "Version $PKG"
+
+      # Ohne node_modules: zum Veröffentlichen reicht das Arbeitsverzeichnis,
+      # und `files` in der package.json bestimmt ohnehin, was ins Paket geht.
+      - run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
