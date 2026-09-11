@@ -141,15 +141,24 @@ const columns = computed(() => {
       const isTop = position === present.length - 1
       // A gap above, except on the topmost segment — there it would sit
       // between the column and thin air and merely shorten it.
-      const height = Math.max(0, bottom - top - (isTop ? 0 : GAP))
+      //
+      // The gap has to come off the **upper** edge, and the drawing has to
+      // start that much lower. Taking it off the height alone left the start
+      // at `top`, so the missing two pixels ended up at the bottom of each
+      // segment: every gap sat one segment too low, and the bottom-most one
+      // floated above the baseline instead of standing on it.
+      const inset = isTop ? 0 : GAP
+      const height = Math.max(0, bottom - top - inset)
       if (height <= 0) return
+
+      const y = top + inset
 
       segments.push({
         key: entry.s.key,
         color: baseKitChartColor(entry.order),
         path: isTop
-          ? cappedPath(columnX(index), top, columnWidth, height)
-          : `M ${columnX(index)} ${top} h ${columnWidth} v ${height} h ${-columnWidth} Z`,
+          ? cappedPath(columnX(index), y, columnWidth, height)
+          : `M ${columnX(index)} ${y} h ${columnWidth} v ${height} h ${-columnWidth} Z`,
       })
     })
 

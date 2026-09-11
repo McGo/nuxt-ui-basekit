@@ -71,6 +71,73 @@ describe('BaseKitChartColumns', () => {
     expect(wrapper.find('.absolute').exists()).toBe(false)
   })
 
+  it('stands the bottom segment on the baseline and gaps the joints', () => {
+    // The gap between two stacked segments has to come off the **upper** edge
+    // of the lower one, and the drawing has to start that much lower with it.
+    // Taking it off the height alone left the start where it was, so the
+    // missing pixels ended up at the bottom of each segment: every gap sat one
+    // segment too low, and the bottom-most segment floated above the axis
+    // instead of standing on it.
+    const w = mount(BaseKitChartColumns, {
+      props: {
+        categories: ['2026-09-09'],
+        series: [
+          { key: 'a', label: 'A', points: [1] },
+          { key: 'b', label: 'B', points: [1] },
+          { key: 'c', label: 'C', points: [1] },
+        ],
+        height: 200,
+      },
+    })
+
+    // PADDING.top 10 + innerHeight 168.
+    const baseline = 178
+
+    // Jedes Segment als [oben, unten], von unten nach oben gelesen.
+    const spans = w.findAll('path[fill^="var(--basekit-chart-"]').map((path) => {
+      const zahlen = (path.attributes('d') ?? '').match(/-?\d+(\.\d+)?/g)?.map(Number) ?? []
+      const oben = zahlen[1]!
+      // Das gerade Segment trägt die Höhe an dritter Stelle; das gekappte
+      // endet mit seiner unteren Kante.
+      const unten = (path.attributes('d') ?? '').includes('Q')
+        ? zahlen[zahlen.length - 1]!
+        : oben + zahlen[3]!
+      return { oben, unten }
+    })
+
+    expect(spans).toHaveLength(3)
+
+    // Unten bündig — nicht zwei Pixel darüber.
+    expect(spans[0]!.unten).toBeCloseTo(baseline, 5)
+
+    // Und an beiden Fugen genau eine Lücke, keine doppelte und keine fehlende.
+    expect(spans[0]!.oben - spans[1]!.unten).toBeCloseTo(2, 5)
+    expect(spans[1]!.oben - spans[2]!.unten).toBeCloseTo(2, 5)
+  })
+
+  it('keeps the top of the stack where the value says, gap or no gap', () => {
+    // Die Lücken dürfen die Säule nicht kürzen: Drei gleiche Werte auf einem
+    // Maximum von drei reichen bis an den oberen Rand der Zeichenfläche.
+    const w = mount(BaseKitChartColumns, {
+      props: {
+        categories: ['2026-09-09'],
+        series: [
+          { key: 'a', label: 'A', points: [1] },
+          { key: 'b', label: 'B', points: [1] },
+          { key: 'c', label: 'C', points: [1] },
+        ],
+        height: 200,
+      },
+    })
+
+    const gekappt = w.findAll('path[fill^="var(--basekit-chart-"]').at(-1)!
+    const zahlen = (gekappt.attributes('d') ?? '').match(/-?\d+(\.\d+)?/g)?.map(Number) ?? []
+
+    // `M x unten L x oben …` — die zweite Zahl ist die untere Kante, die
+    // vierte die obere.
+    expect(zahlen[3]).toBeCloseTo(81.2, 5)
+  })
+
   it('rounds the axis maximum up to a clean number', () => {
     const wrapper = render({
       series: [{ key: 'a', label: 'A', points: [37, 12, 4] }],
