@@ -7,7 +7,7 @@ import. Screenshots are generated from `playground/`; see
 Each file carries its own reasoning in the header comment: what it does, when
 it is the right choice, and when it is not. What follows is the short version.
 
-- [Structure](#structure) — [BaseKitTabs](#basekittabs) · [BaseKitSettingRow](#basekitsettingrow) · [BaseKitEmptyState](#basekitemptystate) · [BaseKitChoiceCard](#basekitchoicecard) · [BaseKitPending](#basekitpending)
+- [Structure](#structure) — [BaseKitTabs](#basekittabs) · [BaseKitSettingRow](#basekitsettingrow) · [BaseKitFormSection](#basekitformsection) · [BaseKitEmptyState](#basekitemptystate) · [BaseKitChoiceCard](#basekitchoicecard) · [BaseKitPending](#basekitpending)
 - [Lists](#lists) — [BaseKitDataTable](#basekitdatatable) · [BaseKitStatTile](#basekitstattile)
 - [Pickers](#pickers) — [BaseKitRecordPicker](#basekitrecordpicker) · [BaseKitIconPicker](#basekiticonpicker) · [BaseKitFileUpload](#basekitfileupload)
 - [Navigation](#navigation) — [BaseKitBackLink](#basekitbacklink) · [BaseKitViewLink](#basekitviewlink)
@@ -59,6 +59,30 @@ extra line below the description.
 <BaseKitSettingRow title="Notifications" description="Receive email and push">
   <USwitch v-model="notifications" />
 </BaseKitSettingRow>
+```
+
+### BaseKitFormSection
+
+A named group of fields inside a form: heading, optional description, fields
+below. The point is the type ladder — section title `text-base font-semibold`,
+section description `text-sm` muted, then `UFormField`'s own `text-sm
+font-medium` label and `text-xs` help. A hand-rolled heading tends to land on
+field-label weight, and the section then reads as a sibling of the fields it
+contains.
+
+Not a card and not a box. Framing every group turns a page of settings into a
+page of boxes.
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/media/BaseKitFormSection-dark.png">
+  <img alt="BaseKitFormSection" src="docs/media/BaseKitFormSection-light.png">
+</picture>
+
+```vue
+<BaseKitFormSection title="Who may start topics?" description="Empty means everyone who can see it.">
+  <UFormField label="Users"><USelectMenu … /></UFormField>
+  <UFormField label="Roles"><USelectMenu … /></UFormField>
+</BaseKitFormSection>
 ```
 
 ### BaseKitEmptyState

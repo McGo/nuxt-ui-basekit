@@ -105,6 +105,20 @@ async function askSomething(): Promise<void> {
       </BaseKitSettingRow>
     </div>
 
+    <div data-shot="BaseKitFormSection" class="shot">
+      <BaseKitFormSection
+        title="Who may start topics?"
+        description="Empty means everyone who can see the section. Otherwise limited to the roles, users or groups picked below."
+      >
+        <UFormField label="Users" help="Named people, regardless of role.">
+          <USelectMenu :items="[]" placeholder="Pick users …" class="w-full" />
+        </UFormField>
+        <UFormField label="Roles">
+          <USelectMenu :items="[]" placeholder="Pick roles …" class="w-full" />
+        </UFormField>
+      </BaseKitFormSection>
+    </div>
+
     <div data-shot="BaseKitEmptyState" class="shot">
       <BaseKitEmptyState
         title="No pages yet"

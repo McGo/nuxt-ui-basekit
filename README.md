@@ -39,7 +39,7 @@ it:
 
 | Group | Components |
 |---|---|
-| Structure | `BaseKitTabs` · `BaseKitSettingRow` · `BaseKitEmptyState` · `BaseKitChoiceCard` · `BaseKitPending` |
+| Structure | `BaseKitTabs` · `BaseKitSettingRow` · `BaseKitFormSection` · `BaseKitEmptyState` · `BaseKitChoiceCard` · `BaseKitPending` |
 | Lists | `BaseKitDataTable` · `BaseKitStatTile` |
 | Pickers | `BaseKitRecordPicker` · `BaseKitIconPicker` · `BaseKitFileUpload` |
 | Navigation | `BaseKitBackLink` · `BaseKitViewLink` |
