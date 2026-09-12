@@ -61,6 +61,8 @@ export interface BaseKitLabels {
   iconClear: string
   chartAsTable: string
   chartAsChart: string
+  /** Accessible name of the draggable edge between two panes. */
+  resize: string
   /** "1–25 of 300" — a function, because the numbers sit inside the sentence. */
   paginationRange: (range: { from: number, to: number, total: number }) => string
   /**
@@ -120,6 +122,7 @@ export const BASEKIT_DEFAULTS: BaseKitConfig = {
     iconClear: 'No icon',
     chartAsTable: 'As table',
     chartAsChart: 'As chart',
+    resize: 'Resize panel',
     paginationRange: ({ from, to, total }) => `${from}–${to} of ${total}`,
     markdown: {
       bold: 'Bold',

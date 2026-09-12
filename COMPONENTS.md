@@ -7,7 +7,7 @@ import. Screenshots are generated from `playground/`; see
 Each file carries its own reasoning in the header comment: what it does, when
 it is the right choice, and when it is not. What follows is the short version.
 
-- [Structure](#structure) — [BaseKitTabs](#basekittabs) · [BaseKitSettingRow](#basekitsettingrow) · [BaseKitFormSection](#basekitformsection) · [BaseKitEmptyState](#basekitemptystate) · [BaseKitChoiceCard](#basekitchoicecard) · [BaseKitPending](#basekitpending)
+- [Structure](#structure) — [BaseKitTabs](#basekittabs) · [BaseKitSettingRow](#basekitsettingrow) · [BaseKitFormSection](#basekitformsection) · [BaseKitResizeHandle](#basekitresizehandle) · [BaseKitEmptyState](#basekitemptystate) · [BaseKitChoiceCard](#basekitchoicecard) · [BaseKitPending](#basekitpending)
 - [Lists](#lists) — [BaseKitDataTable](#basekitdatatable) · [BaseKitStatTile](#basekitstattile)
 - [Pickers](#pickers) — [BaseKitRecordPicker](#basekitrecordpicker) · [BaseKitIconPicker](#basekiticonpicker) · [BaseKitFileUpload](#basekitfileupload)
 - [Navigation](#navigation) — [BaseKitBackLink](#basekitbacklink) · [BaseKitViewLink](#basekitviewlink)
@@ -83,6 +83,26 @@ page of boxes.
   <UFormField label="Users"><USelectMenu … /></UFormField>
   <UFormField label="Roles"><USelectMenu … /></UFormField>
 </BaseKitFormSection>
+```
+
+### BaseKitResizeHandle
+
+The edge between two panes, grabbed to move it. A fixed side panel is a guess
+about content nobody has seen yet: three settings fit into 300 px, eleven do
+not. Making the guess adjustable costs a strip of eight pixels.
+
+The handle owns no width. It reports what the pointer did — `width` in,
+`update:width` out — so the page decides what to do with the number and where
+to keep it. `side` says which edge it sits on, so dragging widens rather than
+narrows on either side of the screen.
+
+Reachable without a pointer: it is a `separator` carrying its value, the arrow
+keys move it in steps (times four with Shift), Home and End go to the limits.
+A double click returns to `reset`, if one is given.
+
+```vue
+<BaseKitResizeHandle v-model:width="width" :min="280" :max="560" :reset="300" />
+<aside :style="{ width: `${width}px` }"> … </aside>
 ```
 
 ### BaseKitEmptyState
