@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { readFileSync, readdirSync, statSync } from 'node:fs'
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs'
 import { join, relative, resolve, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -144,5 +144,48 @@ describe('BaseKit stands on its own', () => {
       .filter(f => !/\/BaseKit[A-Z]\w*(\.global)?\.vue$/.test(f))
 
     expect(wrong).toEqual([])
+  })
+})
+
+/**
+ * What goes wrong only once the package is installed somewhere else.
+ *
+ * The layer ships raw source, so the consumer compiles and typechecks it. Two
+ * mistakes pass everything in this repository — typecheck, tests, playground
+ * dev server — and surface only in a consumer's CI or production build.
+ */
+describe('BaseKit installs cleanly in a consumer', () => {
+  it('ships types for every dependency that brings none of its own', () => {
+    const pkg = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8'))
+    const dependencies = new Set(Object.keys(pkg.dependencies ?? {}))
+    const missing: string[] = []
+
+    for (const name of dependencies) {
+      if (name.startsWith('@types/')) continue
+
+      const dir = join(ROOT, 'node_modules', name)
+      const own = JSON.parse(readFileSync(join(dir, 'package.json'), 'utf8'))
+      const typed = Boolean(own.types || own.typings)
+        || JSON.stringify(own.exports ?? {}).includes('"types"')
+        || existsSync(join(dir, 'index.d.ts'))
+      if (typed) continue
+
+      // `@scope/name` is published as `@types/scope__name`.
+      const typesName = '@types/' + (name.startsWith('@') ? name.slice(1).replace('/', '__') : name)
+      // A dev dependency is not installed in the consumer, whose typecheck then
+      // fails on an implicit `any`.
+      if (!dependencies.has(typesName)) missing.push(`${name} → ${typesName}`)
+    }
+
+    expect(missing).toEqual([])
+  })
+
+  it('sets no alias on its own package name', () => {
+    // An alias `nuxt-ui-basekit` → package root shadows the `exports` map.
+    // `nuxt-ui-basekit/labels` then resolves to a file literally called
+    // `labels` and the consumer's production build fails with ENOENT.
+    const config = readFileSync(join(ROOT, 'nuxt.config.ts'), 'utf8')
+
+    expect(config).not.toMatch(/['"]nuxt-ui-basekit['"]\s*:/)
   })
 })

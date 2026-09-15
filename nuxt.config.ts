@@ -17,7 +17,9 @@ export default defineNuxtConfig({
     name: 'nuxt-ui-basekit',
   },
 
-  css: ['nuxt-ui-basekit/app/assets/css/basekit.css'],
+  // Absoluter Pfad statt Paketname: So hängt das Stylesheet nicht davon ab,
+  // ob der Konsument `nuxt-ui-basekit` selbst auflösen kann.
+  css: [fileURLToPath(new URL('./app/assets/css/basekit.css', import.meta.url))],
 
   // Ohne Pfad-Präfix registrieren: `app/components/charts/BaseKitChartDonut.vue`
   // wird zu `<BaseKitChartDonut>`, nicht `<ChartsBaseKitChartDonut>`.
@@ -37,7 +39,7 @@ export default defineNuxtConfig({
     ],
   },
 
-  alias: {
-    'nuxt-ui-basekit': fileURLToPath(new URL('./', import.meta.url)),
-  },
+  // Bewusst kein `alias` auf `nuxt-ui-basekit`: Er verdeckt die `exports` aus
+  // package.json, und `nuxt-ui-basekit/labels` bricht dann den
+  // Produktions-Build im Konsumenten. tests/grenze.test.ts wacht darüber.
 })
