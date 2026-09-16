@@ -374,7 +374,7 @@ editor is created `onMounted` because ProseMirror needs a DOM — SSR-safe.
 
 ## Charts
 
-All five read their colours from `--basekit-chart-1` … `-5`. The set is
+They read their colours from `--basekit-chart-1` … `-5`. The set is
 validated as a set — lightness band, chroma, neighbour distance, colour vision
 deficiency included. Override it as a set, not one by one.
 
@@ -416,6 +416,33 @@ instead of adding information.
 
 ```vue
 <BaseKitChartBars :items="[{ key: 'search', label: 'Search', value: 4821 }]" :limit="6" />
+```
+
+### BaseKitChartLegend
+
+The identity key for a chart that carries more than one series.
+
+Colour alone is not an identity channel — not under a colour vision
+deficiency, not in print, not on a screen in daylight. A chart that names its
+series by hue and nothing else hands part of its readers a picture they cannot
+decode. One series needs no legend: the title already says what is plotted.
+
+The colours come from the item order, exactly as the charts assign them. Pass
+the same list in the same order and the two agree without either knowing about
+the other.
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/media/BaseKitChartLegend-dark.png">
+  <img alt="BaseKitChartLegend" src="docs/media/BaseKitChartLegend-light.png">
+</picture>
+
+```vue
+<BaseKitChartFigure title="Hours per week">
+  <BaseKitChartColumns :categories="categories" :series="series" />
+  <template #footer>
+    <BaseKitChartLegend :items="series.map(s => ({ key: s.key, label: s.label }))" />
+  </template>
+</BaseKitChartFigure>
 ```
 
 ### BaseKitChartColumns

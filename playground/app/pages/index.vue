@@ -198,6 +198,10 @@ async function askSomething(): Promise<void> {
       <BaseKitChartColumns :categories="categories" :series="series" :height="200" />
     </div>
 
+    <div data-shot="BaseKitChartLegend" class="shot">
+      <BaseKitChartLegend :items="series.map(s => ({ key: s.key, label: s.label }))" />
+    </div>
+
     <div data-shot="BaseKitChartDonut" class="shot max-w-sm">
       <BaseKitChartDonut :slices="slices" center-label="Items" />
     </div>
