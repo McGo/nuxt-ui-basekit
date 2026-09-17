@@ -48,6 +48,19 @@ export interface BaseKitLabels {
   confirmBody: string
   /** Empty list — nothing exists yet. */
   empty: string
+  /**
+   * The selection bar above a selectable table: how many rows are picked.
+   *
+   * A function, like `paginationRange` — the caller's i18n does the counting
+   * and the plural, not a string replacement in here.
+   */
+  selectedCount: (n: number) => string
+  /** Dropping the selection again. */
+  clearSelection: string
+  /** Accessible name of the header checkbox that picks every visible row. */
+  selectAllShown: string
+  /** Accessible name of a row's checkbox. */
+  selectRow: string
   /** Empty list — the search ran and found nothing. */
   noResults: string
   noResultsHint: string
@@ -111,6 +124,10 @@ export const BASEKIT_DEFAULTS: BaseKitConfig = {
     confirmTitle: 'Are you sure?',
     confirmBody: 'This action cannot be undone.',
     empty: 'Nothing here yet',
+    selectedCount: (n: number) => `${n} selected`,
+    clearSelection: 'Clear selection',
+    selectAllShown: 'Select all shown',
+    selectRow: 'Select row',
     noResults: 'No matches',
     noResultsHint: 'Try a different spelling or fewer filters.',
     back: 'Back to overview',

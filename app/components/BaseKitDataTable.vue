@@ -55,19 +55,87 @@ const props = withDefaults(defineProps<{
   rowLink?: (row: T) => string | null | undefined
   /** The column carrying the link. Without it, the first. */
   linkColumn?: string
+  /**
+   * Adds a checkbox column in front and a header checkbox that selects every
+   * row currently shown. Off by default: a table that offers a selection with
+   * nothing to do with it is a promise it does not keep.
+   *
+   * What to do with the selection belongs to the caller — it goes into the
+   * `selection` slot, which only renders while something is selected.
+   */
+  selectable?: boolean
+  /** The selected row keys (v-model:selected). */
+  selected?: Array<string | number>
 }>(), {
   rowKey: 'id',
   searchable: true,
   loading: false,
   pageSize: 25,
   pageSizeOptions: () => [10, 25, 50, 100, 250, 'all'],
+  selectable: false,
+  selected: () => [],
 })
 
-const emit = defineEmits<{ create: [] }>()
+const emit = defineEmits<{ create: [], 'update:selected': [value: Array<string | number>] }>()
 
 const labels = useBaseKitLabels()
 const slots = useSlots()
 const hasActions = computed(() => !!slots.actions)
+
+// — Selection --------------------------------------------------------------
+
+/**
+ * The key of a row, as it appears in `selected`. Strings throughout: a table
+ * may be keyed by a slug, and mixing numbers and strings in one list makes
+ * every comparison a guess.
+ */
+function keyOf(row: T): string {
+  return String(cell(row, props.rowKey))
+}
+
+const selectedSet = computed(() => new Set(props.selected.map(String)))
+
+function isSelected(row: T): boolean {
+  return selectedSet.value.has(keyOf(row))
+}
+
+/**
+ * The header checkbox covers **what is shown**, not the whole table: with a
+ * filter or a page size set, "all" means the rows in front of you. Selecting
+ * things you cannot see is how people delete the wrong records.
+ */
+const allShownSelected = computed(() =>
+  paged.value.length > 0 && paged.value.every(isSelected),
+)
+
+const someShownSelected = computed(() =>
+  paged.value.some(isSelected) && !allShownSelected.value,
+)
+
+function toggleRow(row: T): void {
+  const key = keyOf(row)
+  const next = selectedSet.value.has(key)
+    ? props.selected.filter(k => String(k) !== key)
+    : [...props.selected, key]
+
+  emit('update:selected', next)
+}
+
+function toggleAllShown(): void {
+  const shown = paged.value.map(keyOf)
+
+  // All of them selected → clear exactly those, keep a selection made on
+  // another page. Otherwise add the missing ones.
+  const next = allShownSelected.value
+    ? props.selected.filter(k => !shown.includes(String(k)))
+    : [...props.selected, ...shown.filter(k => !selectedSet.value.has(k))]
+
+  emit('update:selected', next)
+}
+
+function clearSelection(): void {
+  emit('update:selected', [])
+}
 
 const search = ref('')
 const sortKey = ref<string | null>(null)
@@ -195,6 +263,32 @@ function sortIcon(col: BaseKitDataColumn): string | null {
       </div>
     </div>
 
+    <!--
+      The selection bar. It exists only while something is selected — a bar
+      sitting there empty takes room and says nothing. What it offers comes
+      from the caller through the `selection` slot; the table itself knows of
+      no action and performs none.
+
+      It sits above the states on purpose: a selection survives switching the
+      page or narrowing the search, and it would be gone from view exactly
+      when it matters.
+    -->
+    <div
+      v-if="selectable && selected.length"
+      class="flex flex-wrap items-center gap-3 rounded-lg bg-neutral-50 px-3 py-2 dark:bg-neutral-900"
+      data-test="selection-bar"
+    >
+      <span class="text-sm font-medium">
+        {{ labels.selectedCount(selected.length) }}
+      </span>
+      <div class="flex flex-wrap items-center gap-2">
+        <slot name="selection" :selected="selected" :clear="clearSelection" />
+      </div>
+      <UButton size="xs" color="neutral" variant="ghost" class="ms-auto" @click="clearSelection">
+        {{ labels.clearSelection }}
+      </UButton>
+    </div>
+
     <!-- States -->
     <div v-if="loading" class="py-12 text-center text-muted">
       <UIcon name="i-lucide-loader-2" class="size-6 animate-spin" />
@@ -213,6 +307,14 @@ function sortIcon(col: BaseKitDataColumn): string | null {
     <table v-else class="w-full text-sm">
       <thead class="border-b border-neutral-200 text-left text-muted dark:border-neutral-800">
         <tr>
+          <th v-if="selectable" class="w-8 py-2">
+            <UCheckbox
+              :model-value="allShownSelected"
+              :indeterminate="someShownSelected"
+              :aria-label="labels.selectAllShown"
+              @update:model-value="toggleAllShown"
+            />
+          </th>
           <th
             v-for="col in columns"
             :key="col.key"
@@ -242,7 +344,15 @@ function sortIcon(col: BaseKitDataColumn): string | null {
           v-for="row in paged"
           :key="String(cell(row, rowKey))"
           class="hover:bg-neutral-50 dark:hover:bg-neutral-900/50"
+          :class="selectable && isSelected(row) ? 'bg-primary-50/60 dark:bg-primary-950/30' : ''"
         >
+          <td v-if="selectable" class="w-8 py-2">
+            <UCheckbox
+              :model-value="isSelected(row)"
+              :aria-label="labels.selectRow"
+              @update:model-value="toggleRow(row)"
+            />
+          </td>
           <td
             v-for="col in columns"
             :key="col.key"
