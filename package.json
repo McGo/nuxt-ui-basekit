@@ -1,6 +1,6 @@
 {
   "name": "nuxt-ui-basekit",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "Markenfreie Basis-Komponenten für Nuxt 4 auf Nuxt UI — Tabellen, Reiter, Diagramme, Auswahl und Leerzustände als Nuxt-Layer.",
   "keywords": [
     "nuxt",
