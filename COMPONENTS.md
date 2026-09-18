@@ -10,7 +10,7 @@ it is the right choice, and when it is not. What follows is the short version.
 - [Structure](#structure) — [BaseKitTabs](#basekittabs) · [BaseKitSettingRow](#basekitsettingrow) · [BaseKitFormSection](#basekitformsection) · [BaseKitResizeHandle](#basekitresizehandle) · [BaseKitEmptyState](#basekitemptystate) · [BaseKitChoiceCard](#basekitchoicecard) · [BaseKitPending](#basekitpending)
 - [Lists](#lists) — [BaseKitDataTable](#basekitdatatable) · [BaseKitStatTile](#basekitstattile)
 - [Pickers](#pickers) — [BaseKitRecordPicker](#basekitrecordpicker) · [BaseKitIconPicker](#basekiticonpicker) · [BaseKitFileUpload](#basekitfileupload)
-- [Navigation](#navigation) — [BaseKitBackLink](#basekitbacklink) · [BaseKitViewLink](#basekitviewlink)
+- [Navigation](#navigation) — [BaseKitBackLink](#basekitbacklink) · [BaseKitViewLink](#basekitviewlink) · [BaseKitTabBar](#basekittabbar) · [BaseKitPullToRefresh](#basekitpulltorefresh)
 - [Confirmation](#confirmation) — [BaseKitConfirmModal](#basekitconfirmmodal)
 - [Text](#text) — [BaseKitMarkdownEditor](#basekitmarkdowneditor)
 - [Charts](#charts) — [BaseKitChartFigure](#basekitchartfigure) · [BaseKitChartBars](#basekitchartbars) · [BaseKitChartColumns](#basekitchartcolumns) · [BaseKitChartDonut](#basekitchartdonut) · [BaseKitChartMeter](#basekitchartmeter)
@@ -320,6 +320,48 @@ at the call site, where it is known whether anything has been saved.
 
 ```vue
 <BaseKitViewLink v-if="page.slug" :to="`/${page.slug}`" />
+```
+
+### BaseKitTabBar
+
+The row of tabs along the bottom edge of a phone screen. On a phone the menu
+hides behind a button in the top corner, the one place a thumb does not reach;
+the tab bar puts the few destinations people move between where the thumb
+already is.
+
+Three to five entries. An item without `to` renders as a button and reports
+`select` — that is the "More" tab that opens the full menu. Which tab is active
+is the caller's call, and so is the position: as the last child of a
+full-height flex column, or `fixed inset-x-0 bottom-0` in a scrolling document.
+The bar clears the iPhone home indicator via `env(safe-area-inset-bottom)`,
+which needs `viewport-fit=cover` in the page's viewport meta.
+
+```vue
+<BaseKitTabBar
+  class="lg:hidden"
+  :items="[
+    { key: 'home', label: 'Home', icon: 'i-lucide-house', to: '/', active: route.path === '/' },
+    { key: 'inbox', label: 'Inbox', icon: 'i-lucide-inbox', to: '/inbox', badge: 2 },
+    { key: 'more', label: 'More', icon: 'i-lucide-menu' },
+  ]"
+  @select="key => key === 'more' && (menuOpen = true)"
+/>
+```
+
+### BaseKitPullToRefresh
+
+Pull down at the top of a scroll container to reload. A page whose content
+scrolls inside a container — a dashboard panel, a native WebView — never gets
+the browser's own gesture, so this one supplies it. It only engages while the
+container sits at the very top and the finger moves down; every other touch
+passes through. `refresh` may return a promise, the spinner runs until it
+settles. Without touch input it is inert.
+
+```vue
+<div ref="scroller" class="overflow-y-auto">
+  <BaseKitPullToRefresh :target="scroller" :refresh="reload" />
+  …
+</div>
 ```
 
 ---
