@@ -42,6 +42,11 @@ export interface BaseKitLabels {
   edit: string
   cancel: string
   confirm: string
+  /**
+   * Fallback label for the action in `BaseKitPageBar` — the common case is
+   * saving, so that is what it says until a page names its own.
+   */
+  save: string
   /** Heading of the confirmation when the caller passes none. */
   confirmTitle: string
   /** Body of the confirmation when the caller passes none. */
@@ -121,6 +126,7 @@ export const BASEKIT_DEFAULTS: BaseKitConfig = {
     edit: 'Edit',
     cancel: 'Cancel',
     confirm: 'Confirm',
+    save: 'Save',
     confirmTitle: 'Are you sure?',
     confirmBody: 'This action cannot be undone.',
     empty: 'Nothing here yet',

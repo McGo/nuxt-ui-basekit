@@ -76,6 +76,18 @@ async function askSomething(): Promise<void> {
 
 <template>
   <div class="mx-auto max-w-3xl space-y-10 p-10">
+    <div data-shot="BaseKitPageBar" class="shot">
+      <BaseKitPageBar title="Administrator" feedback="Saved a moment ago">
+        <template #actions>
+          <BaseKitBackLink to="/roles" />
+        </template>
+      </BaseKitPageBar>
+      <div class="space-y-3 pt-4 text-sm text-muted">
+        <p>A long form scrolls underneath — the bar and its answer stay put.</p>
+        <p>Title on the left, actions and Save on the right, every time.</p>
+      </div>
+    </div>
+
     <div data-shot="BaseKitTabs" class="shot">
       <BaseKitTabs v-model="tab" :items="tabs">
         <template #overview>
