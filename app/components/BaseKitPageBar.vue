@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, useAttrs } from 'vue'
 import { useBaseKitLabels } from '../composables/useBaseKit'
 
 /**
@@ -45,6 +45,13 @@ import { useBaseKitLabels } from '../composables/useBaseKit'
  * `action` as a slot for the page whose corner holds something else entirely —
  * a form split into tabs that each store on their own, or two buttons side by
  * side. Passing it drops the default button and the caller owns the corner.
+ *
+ * **No listener, no button.** A page that only lists things has no single
+ * action, and it should not have to say so: the button appears when someone
+ * passes `@action` or fills the slot, and otherwise the corner stays empty.
+ * It was the other way round at first, and that was a trap — two thirds of the
+ * callers had to write `<template #action />` to get rid of a "Save" they never
+ * asked for, and whoever forgot got a button that looked real and did nothing.
  */
 const props = withDefaults(defineProps<{
   /** Shown on the left. The `title` slot takes markup the prop cannot. */
@@ -70,7 +77,21 @@ const props = withDefaults(defineProps<{
   feedback: null,
 })
 
-const emit = defineEmits<{ action: [] }>()
+/**
+ * Is anybody listening? `@action` lands in `attrs` as `onAction`, and that is
+ * the honest signal: it is exactly what the caller wrote, so it cannot drift
+ * from a second `showAction` prop saying the same thing.
+ *
+ * **Hence no `defineEmits` for it.** Vue strips listeners of declared emits
+ * out of `attrs`, which would make the check always false — and the button
+ * would vanish everywhere, including the editors that need it. Declaring the
+ * emit and asking whether anyone listens are mutually exclusive; the question
+ * is worth more here than the typed emit.
+ */
+defineOptions({ inheritAttrs: false })
+
+const attrs = useAttrs() as { onAction?: () => void }
+const hasAction = computed(() => typeof attrs.onAction === 'function')
 
 const labels = useBaseKitLabels()
 const label = computed(() => props.actionLabel || labels.value.save)
@@ -80,7 +101,7 @@ const message = computed(() => props.error ?? props.feedback)
 </script>
 
 <template>
-  <div class="basekit-page-bar" data-test="page-bar">
+  <div v-bind="{ ...$attrs, onAction: undefined }" class="basekit-page-bar" data-test="page-bar">
     <div class="min-w-0 flex-1">
       <h1 v-if="$slots.title || title" class="truncate text-xl font-semibold">
         <slot name="title">{{ title }}</slot>
@@ -104,11 +125,12 @@ const message = computed(() => props.error ?? props.feedback)
 
       <slot name="action">
         <UButton
+          v-if="hasAction"
           :icon="actionIcon"
           :loading="pending"
           :disabled="disabled"
           data-test="page-bar-action"
-          @click="emit('action')"
+          @click="attrs.onAction?.()"
         >
           {{ label }}
         </UButton>

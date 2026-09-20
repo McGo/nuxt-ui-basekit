@@ -7,7 +7,7 @@ import. Screenshots are generated from `playground/`; see
 Each file carries its own reasoning in the header comment: what it does, when
 it is the right choice, and when it is not. What follows is the short version.
 
-- [Structure](#structure) — [BaseKitTabs](#basekittabs) · [BaseKitSettingRow](#basekitsettingrow) · [BaseKitFormSection](#basekitformsection) · [BaseKitResizeHandle](#basekitresizehandle) · [BaseKitEmptyState](#basekitemptystate) · [BaseKitChoiceCard](#basekitchoicecard) · [BaseKitPending](#basekitpending)
+- [Structure](#structure) — [BaseKitPageBar](#basekitpagebar) · [BaseKitTabs](#basekittabs) · [BaseKitSettingRow](#basekitsettingrow) · [BaseKitFormSection](#basekitformsection) · [BaseKitResizeHandle](#basekitresizehandle) · [BaseKitEmptyState](#basekitemptystate) · [BaseKitChoiceCard](#basekitchoicecard) · [BaseKitPending](#basekitpending)
 - [Lists](#lists) — [BaseKitDataTable](#basekitdatatable) · [BaseKitStatTile](#basekitstattile)
 - [Pickers](#pickers) — [BaseKitRecordPicker](#basekitrecordpicker) · [BaseKitIconPicker](#basekiticonpicker) · [BaseKitFileUpload](#basekitfileupload)
 - [Navigation](#navigation) — [BaseKitBackLink](#basekitbacklink) · [BaseKitViewLink](#basekitviewlink) · [BaseKitTabBar](#basekittabbar) · [BaseKitPullToRefresh](#basekitpulltorefresh)
@@ -18,6 +18,41 @@ it is the right choice, and when it is not. What follows is the short version.
 ---
 
 ## Structure
+
+### BaseKitPageBar
+
+Keeps a page's main action in sight while the page scrolls: title on the left,
+secondary links and the answer to the last click on the right, the action in
+the corner. The same bar for an editor that saves and a list that creates —
+two different headers would be two layouts to learn, for no gain.
+
+**No listener, no button.** The action appears when you pass `@action` or fill
+the `action` slot, and otherwise the corner stays empty. It was the other way
+round until 0.7.3, and that was a trap: two thirds of the callers had to write
+`<template #action />` to get rid of a "Save" they never asked for, and whoever
+forgot shipped a button that looked real and did nothing.
+
+`position: sticky`, so it attaches to whatever scrolls — the viewport in a
+plain document, the panel body in a dashboard shell. It asks nothing of the
+page but a place to stand.
+
+```vue
+<!-- an editor -->
+<BaseKitPageBar :title="role.name" :pending="saving" :error="error" @action="save">
+  <template #actions><BaseKitBackLink to="/roles" /></template>
+</BaseKitPageBar>
+
+<!-- a list that creates -->
+<BaseKitPageBar title="Sections" :action-label="t('spaces.add')" action-icon="i-lucide-plus" @action="create" />
+
+<!-- a list that only lists — no action, no button -->
+<BaseKitPageBar :title="t('users.title')" />
+
+<!-- tabs that each store on their own: the caller owns the corner -->
+<BaseKitPageBar title="Group">
+  <template #action><UButton @click="storeTab">Store tab</UButton></template>
+</BaseKitPageBar>
+```
 
 ### BaseKitTabs
 

@@ -22,6 +22,11 @@ function render(props: Record<string, unknown> = {}, slots: Record<string, strin
   return mount(BaseKitPageBar, { props, slots, global: { stubs } })
 }
 
+/** With a listener — the only way a button appears at all. */
+function renderActing(props: Record<string, unknown> = {}, slots: Record<string, string> = {}) {
+  return mount(BaseKitPageBar, { props, slots, attrs: { onAction: () => {} }, global: { stubs } })
+}
+
 describe('BaseKitPageBar', () => {
   it('shows the title and lets the slot carry markup the prop cannot', () => {
     expect(render({ title: 'Administrator' }).get('h1').text()).toBe('Administrator')
@@ -37,21 +42,37 @@ describe('BaseKitPageBar', () => {
   })
 
   it('asks the caller to act', async () => {
-    const w = render({ title: 'Role' })
+    // Checked through the listener, not `emitted()`: `action` is deliberately
+    // not a declared emit — see the component for why.
+    let geklickt = 0
+    const w = mount(BaseKitPageBar, {
+      props: { title: 'Role' },
+      attrs: { onAction: () => { geklickt += 1 } },
+      global: { stubs },
+    })
 
     await w.get('[data-test="page-bar-action"]').trigger('click')
 
-    expect(w.emitted('action')).toHaveLength(1)
+    expect(geklickt).toBe(1)
   })
 
   it('blocks the button while working and when disabled', () => {
-    expect(render({ pending: true }).get('[data-test="page-bar-action"]').attributes('data-loading')).toBe('1')
-    expect(render({ disabled: true }).get('[data-test="page-bar-action"]').attributes('disabled')).toBeDefined()
+    expect(renderActing({ pending: true }).get('[data-test="page-bar-action"]').attributes('data-loading')).toBe('1')
+    expect(renderActing({ disabled: true }).get('[data-test="page-bar-action"]').attributes('disabled')).toBeDefined()
+  })
+
+  it('shows no button at all when nobody is listening', () => {
+    // The point of the whole thing: a page that only lists something has no
+    // single action, and should not have to say so. It used to be the other
+    // way round — two thirds of the callers wrote `<template #action />` to
+    // get rid of a "Save" they never asked for, and whoever forgot shipped a
+    // button that looked real and did nothing.
+    expect(render({ title: 'Users' }).find('[data-test="page-bar-action"]').exists()).toBe(false)
   })
 
   it('falls back to Save and lets the page name its own action', () => {
-    expect(render().get('[data-test="page-bar-action"]').text()).toBe('Save')
-    expect(render({ actionLabel: 'Sichern' }).get('[data-test="page-bar-action"]').text()).toBe('Sichern')
+    expect(renderActing().get('[data-test="page-bar-action"]').text()).toBe('Save')
+    expect(renderActing({ actionLabel: 'Sichern' }).get('[data-test="page-bar-action"]').text()).toBe('Sichern')
   })
 
   it('says nothing until there is something to say', () => {
@@ -76,7 +97,7 @@ describe('BaseKitPageBar', () => {
   it('keeps title, links and action in that order', () => {
     // Not "Saved" as the confirmation: it contains "Save", and indexOf then
     // finds the button inside the message instead of the button itself.
-    const w = render({ title: 'Role', feedback: 'Stored' }, { actions: '<a class="back">Back</a>' })
+    const w = renderActing({ title: 'Role', feedback: 'Stored' }, { actions: '<a class="back">Back</a>' })
     const text = w.text()
 
     expect(text.indexOf('Role')).toBeLessThan(text.indexOf('Back'))
