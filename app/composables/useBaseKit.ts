@@ -85,6 +85,16 @@ export interface BaseKitLabels {
   check: string
   /** `BaseKitCheckButton` while checked. */
   uncheck: string
+  /** Accessible name of the section row in `BaseKitSectionTabs`. */
+  sections: string
+  /**
+   * `BaseKitScopeBreadcrumb`: the button next to a level that lists its
+   * siblings. Gets the kind of the level ("customer") when the caller names
+   * one, otherwise its label.
+   */
+  scopeSwitch: (name: string) => string
+  /** A list that is still on its way. */
+  loading: string
   /** "1–25 of 300" — a function, because the numbers sit inside the sentence. */
   paginationRange: (range: { from: number, to: number, total: number }) => string
   /**
@@ -152,6 +162,9 @@ export const BASEKIT_DEFAULTS: BaseKitConfig = {
     resize: 'Resize panel',
     check: 'Mark as done',
     uncheck: 'Mark as not done',
+    sections: 'Sections',
+    scopeSwitch: name => `Switch ${name}`,
+    loading: 'Loading…',
     paginationRange: ({ from, to, total }) => `${from}–${to} of ${total}`,
     markdown: {
       bold: 'Bold',

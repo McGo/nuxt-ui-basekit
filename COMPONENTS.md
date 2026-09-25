@@ -7,10 +7,10 @@ import. Screenshots are generated from `playground/`; see
 Each file carries its own reasoning in the header comment: what it does, when
 it is the right choice, and when it is not. What follows is the short version.
 
-- [Structure](#structure) — [BaseKitPageBar](#basekitpagebar) · [BaseKitTabs](#basekittabs) · [BaseKitSettingRow](#basekitsettingrow) · [BaseKitFormSection](#basekitformsection) · [BaseKitResizeHandle](#basekitresizehandle) · [BaseKitEmptyState](#basekitemptystate) · [BaseKitChoiceCard](#basekitchoicecard) · [BaseKitPending](#basekitpending)
+- [Structure](#structure) — [BaseKitPageBar](#basekitpagebar) · [BaseKitTabs](#basekittabs) · [BaseKitSectionTabs](#basekitsectiontabs) · [BaseKitSettingRow](#basekitsettingrow) · [BaseKitFormSection](#basekitformsection) · [BaseKitResizeHandle](#basekitresizehandle) · [BaseKitEmptyState](#basekitemptystate) · [BaseKitChoiceCard](#basekitchoicecard) · [BaseKitPending](#basekitpending)
 - [Lists](#lists) — [BaseKitDataTable](#basekitdatatable) · [BaseKitStatTile](#basekitstattile) · [BaseKitCheckButton](#basekitcheckbutton) · [BaseKitStrike](#basekitstrike) · [BaseKitCollapse](#basekitcollapse)
 - [Pickers](#pickers) — [BaseKitRecordPicker](#basekitrecordpicker) · [BaseKitIconPicker](#basekiticonpicker) · [BaseKitFileUpload](#basekitfileupload)
-- [Navigation](#navigation) — [BaseKitBackLink](#basekitbacklink) · [BaseKitViewLink](#basekitviewlink) · [BaseKitTabBar](#basekittabbar) · [BaseKitPullToRefresh](#basekitpulltorefresh)
+- [Navigation](#navigation) — [BaseKitBackLink](#basekitbacklink) · [BaseKitViewLink](#basekitviewlink) · [BaseKitScopeBreadcrumb](#basekitscopebreadcrumb) · [BaseKitTabBar](#basekittabbar) · [BaseKitPullToRefresh](#basekitpulltorefresh)
 - [Confirmation](#confirmation) — [BaseKitConfirmModal](#basekitconfirmmodal)
 - [Text](#text) — [BaseKitMarkdownEditor](#basekitmarkdowneditor)
 - [Charts](#charts) — [BaseKitChartFigure](#basekitchartfigure) · [BaseKitChartBars](#basekitchartbars) · [BaseKitChartColumns](#basekitchartcolumns) · [BaseKitChartDonut](#basekitchartdonut) · [BaseKitChartMeter](#basekitchartmeter)
@@ -77,6 +77,48 @@ a differing first render would be a hydration mismatch.
   <template #general>…</template>
   <template #access>…</template>
 </BaseKitTabs>
+```
+
+### BaseKitSectionTabs
+
+The sections of one record — a customer, a project — and, where a section
+holds more than one thing, a second and quieter row of sub-sections. A record
+with fifteen tabs in one row does not fit on a laptop and hides the last five;
+ten sections in a fixed order, with sub-sections where needed, do.
+
+Where the selection lives is the caller's choice. `mode="query"` keeps it in
+`?section=…&sub=…` (names via `query-keys`) and hands `{ section, sub }` to
+the default slot, which draws the content. `mode="route"` treats every
+sub-section as a page of its own with a `to`; active is the longest match on
+the current path, and the default slot holds `<NuxtPage />`. A section with a
+single sub-section shows no second row.
+
+`legacy` rewrites a former query parameter once on mount — after regrouping
+tabs, `?tab=time` from an old link becomes `?section=work&sub=time`. On phones
+the section row turns into a select. The bar comes unframed; `bar-class`
+frames it and the `bar-top` slot puts an accent line or hint on top.
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/media/BaseKitSectionTabs-dark.png">
+  <img alt="BaseKitSectionTabs" src="docs/media/BaseKitSectionTabs-light.png">
+</picture>
+
+```vue
+<BaseKitSectionTabs
+  :items="[
+    { key: 'overview', label: 'Overview', icon: 'i-lucide-layout-dashboard', children: [{ key: 'overview', label: 'Overview' }] },
+    { key: 'work', label: 'Work & time', icon: 'i-lucide-list-checks', children: [
+      { key: 'tasks', label: 'Tasks', badge: 4 },
+      { key: 'time', label: 'Time' },
+    ] },
+  ]"
+  :legacy="{ param: 'tab', map: { time: ['work', 'time'] } }"
+>
+  <template #default="{ section, sub }">
+    <TaskList v-if="sub === 'tasks'" />
+    <TimeList v-else-if="sub === 'time'" />
+  </template>
+</BaseKitSectionTabs>
 ```
 
 ### BaseKitSettingRow
@@ -426,6 +468,38 @@ at the call site, where it is known whether anything has been saved.
 
 ```vue
 <BaseKitViewLink v-if="page.slug" :to="`/${page.slug}`" />
+```
+
+### BaseKitScopeBreadcrumb
+
+The breadcrumb of a nested record — customer › project › epic — in which each
+level can be swapped for one of its siblings. `UBreadcrumb` only links
+upwards; moving sideways to the next project of the same customer then means a
+trip to the list and back. Here the chevrons next to a level open its siblings
+in place. They are fetched through the level's `siblings` function when the
+menu first opens, and kept.
+
+Colour belongs to the caller: `class` on a level and on `marker` reaches the
+icon, so an application can tell its levels apart without the package knowing
+them. On narrow screens only the last level stays; the `after` slot holds
+status, a star, whatever belongs to the record.
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/media/BaseKitScopeBreadcrumb-dark.png">
+  <img alt="BaseKitScopeBreadcrumb" src="docs/media/BaseKitScopeBreadcrumb-light.png">
+</picture>
+
+```vue
+<BaseKitScopeBreadcrumb
+  :marker="{ icon: 'i-lucide-flag', class: 'text-secondary' }"
+  :levels="[
+    { key: customer.id, label: customer.name, to: `/customers/${customer.id}`, kind: 'customer',
+      siblings: () => $fetch('/api/customers').then(r => r.map(c => ({ key: c.id, label: c.name, to: `/customers/${c.id}` }))) },
+    { key: project.id, label: project.name, prefix: '007', to: `/projects/${project.id}`, kind: 'project' },
+  ]"
+>
+  <template #after><UBadge label="Active" color="success" variant="subtle" /></template>
+</BaseKitScopeBreadcrumb>
 ```
 
 ### BaseKitTabBar

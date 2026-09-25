@@ -37,6 +37,48 @@ const recordItems = [
   { value: 3, label: 'Join', type: 'Section', hint: 'Section/join', editHref: '/sections/3' },
 ]
 
+// BaseKitSectionTabs: a customer record with sections and sub-sections.
+const sections = [
+  { key: 'overview', label: 'Overview', icon: 'i-lucide-layout-dashboard', children: [{ key: 'overview', label: 'Overview' }] },
+  {
+    key: 'work', label: 'Work & time', icon: 'i-lucide-list-checks', children: [
+      { key: 'tasks', label: 'Tasks', badge: 4 },
+      { key: 'time', label: 'Time' },
+    ],
+  },
+  { key: 'communication', label: 'Communication', icon: 'i-lucide-messages-square', children: [{ key: 'notes', label: 'Notes' }, { key: 'mail', label: 'Mail' }] },
+  { key: 'documents', label: 'Documents', icon: 'i-lucide-file-text', children: [{ key: 'documents', label: 'Documents' }] },
+  { key: 'finance', label: 'Finance', icon: 'i-lucide-receipt', children: [{ key: 'invoices', label: 'Invoices' }, { key: 'costs', label: 'Costs' }] },
+]
+
+// The section tabs read the address. Open a section with sub-sections, so the
+// screenshot shows both rows.
+const route = useRoute()
+const router = useRouter()
+onMounted(() => {
+  if (!route.query.section) router.replace({ query: { section: 'work', sub: 'tasks' } })
+})
+
+// BaseKitScopeBreadcrumb: customer › project › epic, siblings on demand.
+const scope = [
+  {
+    key: 'acme', label: 'Harbour Books Ltd', to: '/', kind: 'customer', icon: 'i-lucide-building-2',
+    siblings: () => [
+      { key: 'acme', label: 'Harbour Books Ltd', to: '/', icon: 'i-lucide-building-2' },
+      { key: 'mill', label: 'Old Mill Bakery', to: '/', icon: 'i-lucide-building-2' },
+      { key: 'fern', label: 'Fern & Stone Gardens', to: '/', icon: 'i-lucide-building-2' },
+    ],
+  },
+  {
+    key: 'shop', label: 'Online shop', prefix: '007', to: '/', kind: 'project', icon: 'i-lucide-folder-kanban',
+    siblings: () => [
+      { key: 'shop', label: '007 Online shop', to: '/' },
+      { key: 'pos', label: '008 Till system', to: '/' },
+    ],
+  },
+  { key: 'checkout', label: 'Checkout', to: '/', kind: 'epic', siblings: () => [{ key: 'checkout', label: 'Checkout', to: '/' }, { key: 'import', label: 'Product import', to: '/' }] },
+]
+
 const tabs = [
   { key: 'overview', label: 'Overview', icon: 'i-lucide-layout-dashboard' },
   { key: 'members', label: 'Members', icon: 'i-lucide-users' },
@@ -108,6 +150,24 @@ async function askSomething(): Promise<void> {
           </p>
         </template>
       </BaseKitTabs>
+    </div>
+
+    <div data-shot="BaseKitSectionTabs" class="shot">
+      <BaseKitSectionTabs :items="sections" bar-class="border border-default rounded-md bg-default">
+        <template #default="{ section, sub }">
+          <p class="text-sm text-muted">
+            Section <code>{{ section }}</code>, sub-section <code>{{ sub }}</code> — both in the address.
+          </p>
+        </template>
+      </BaseKitSectionTabs>
+    </div>
+
+    <div data-shot="BaseKitScopeBreadcrumb" class="shot">
+      <BaseKitScopeBreadcrumb :levels="scope" :marker="{ icon: 'i-lucide-flag' }">
+        <template #after>
+          <UBadge label="Active" color="success" variant="subtle" />
+        </template>
+      </BaseKitScopeBreadcrumb>
     </div>
 
     <div data-shot="BaseKitSettingRow" class="shot">

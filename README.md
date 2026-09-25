@@ -39,10 +39,10 @@ it:
 
 | Group | Components |
 |---|---|
-| Structure | `BaseKitPageBar` · `BaseKitTabs` · `BaseKitSettingRow` · `BaseKitFormSection` · `BaseKitEmptyState` · `BaseKitChoiceCard` · `BaseKitPending` |
+| Structure | `BaseKitPageBar` · `BaseKitTabs` · `BaseKitSectionTabs` · `BaseKitSettingRow` · `BaseKitFormSection` · `BaseKitEmptyState` · `BaseKitChoiceCard` · `BaseKitPending` |
 | Lists | `BaseKitDataTable` · `BaseKitStatTile` · `BaseKitCheckButton` · `BaseKitStrike` · `BaseKitCollapse` + `useDelayedCheck()` |
 | Pickers | `BaseKitRecordPicker` · `BaseKitIconPicker` · `BaseKitFileUpload` |
-| Navigation | `BaseKitBackLink` · `BaseKitViewLink` |
+| Navigation | `BaseKitBackLink` · `BaseKitViewLink` · `BaseKitScopeBreadcrumb` |
 | Confirmation | `BaseKitConfirmModal` + `useConfirm()` |
 | Text | `BaseKitMarkdownEditor` |
 | Charts | `BaseKitChartBars` · `-Columns` · `-Donut` · `-Meter` · `-Figure` |

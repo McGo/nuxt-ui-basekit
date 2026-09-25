@@ -10,7 +10,7 @@ The script looks for blocks carrying `data-shot` and writes two files per block
 under `docs/media/`. Adding a component means adding a block in the playground —
 nothing to change here.
 
-Three components show nothing but a button while closed and would be worthless
+Some components show nothing but a button while closed and would be worthless
 as a screenshot. They are listed in OPENED below: the script clicks them open
 and shoots the trigger together with the panel.
 """
@@ -29,7 +29,8 @@ SCALE = 2
 #
 # name: (trigger, panel, with_trigger)
 #
-# `with_trigger` decides the crop. The icon picker opens right below its
+# `with_trigger` decides the crop (True, False or "block" for the whole
+# block around the trigger). The icon picker opens right below its
 # button, and only both together make the picture. The two modals sit centred
 # over the page, far from their trigger; a union would drag the crop across
 # half the page.
@@ -37,6 +38,7 @@ OPENED = {
     "BaseKitIconPicker": ('[data-shot="BaseKitIconPicker"] button', '[data-reka-popper-content-wrapper]', True),
     "BaseKitRecordPicker": ('[data-shot="BaseKitRecordPicker"] button', '[role="dialog"]', False),
     "BaseKitConfirmModal": ('[data-shot="BaseKitConfirmModal-trigger"] button', '[role="dialog"]', False),
+    "BaseKitScopeBreadcrumb": ('[data-shot="BaseKitScopeBreadcrumb"] [data-test="scope-switch"]', '[data-reka-popper-content-wrapper]', "block"),
 }
 
 
@@ -116,7 +118,10 @@ def shoot_opened(page, suffix: str) -> int:
             # Only this block stays standing, the rest disappears.
             isolate(page, name)
             page.wait_for_timeout(120)
-            trigger_box = trigger.bounding_box()
+            # "block": the whole block around the trigger, for a trigger that
+            # sits in the middle of a row (the breadcrumb's level switch).
+            anchor = page.query_selector(f'[data-shot="{name}"]') if with_trigger == "block" else trigger
+            trigger_box = anchor.bounding_box() if anchor else None
             clip = union(box, trigger_box) if trigger_box else box
         else:
             isolate(page, None)
