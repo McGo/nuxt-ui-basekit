@@ -81,6 +81,10 @@ export interface BaseKitLabels {
   chartAsChart: string
   /** Accessible name of the draggable edge between two panes. */
   resize: string
+  /** `BaseKitCheckButton` while unchecked — what a tap does. */
+  check: string
+  /** `BaseKitCheckButton` while checked. */
+  uncheck: string
   /** "1–25 of 300" — a function, because the numbers sit inside the sentence. */
   paginationRange: (range: { from: number, to: number, total: number }) => string
   /**
@@ -146,6 +150,8 @@ export const BASEKIT_DEFAULTS: BaseKitConfig = {
     chartAsTable: 'As table',
     chartAsChart: 'As chart',
     resize: 'Resize panel',
+    check: 'Mark as done',
+    uncheck: 'Mark as not done',
     paginationRange: ({ from, to, total }) => `${from}–${to} of ${total}`,
     markdown: {
       bold: 'Bold',

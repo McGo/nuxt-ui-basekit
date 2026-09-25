@@ -40,7 +40,7 @@ it:
 | Group | Components |
 |---|---|
 | Structure | `BaseKitPageBar` · `BaseKitTabs` · `BaseKitSettingRow` · `BaseKitFormSection` · `BaseKitEmptyState` · `BaseKitChoiceCard` · `BaseKitPending` |
-| Lists | `BaseKitDataTable` · `BaseKitStatTile` |
+| Lists | `BaseKitDataTable` · `BaseKitStatTile` · `BaseKitCheckButton` · `BaseKitStrike` · `BaseKitCollapse` + `useDelayedCheck()` |
 | Pickers | `BaseKitRecordPicker` · `BaseKitIconPicker` · `BaseKitFileUpload` |
 | Navigation | `BaseKitBackLink` · `BaseKitViewLink` |
 | Confirmation | `BaseKitConfirmModal` + `useConfirm()` |

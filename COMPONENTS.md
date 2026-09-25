@@ -8,7 +8,7 @@ Each file carries its own reasoning in the header comment: what it does, when
 it is the right choice, and when it is not. What follows is the short version.
 
 - [Structure](#structure) — [BaseKitPageBar](#basekitpagebar) · [BaseKitTabs](#basekittabs) · [BaseKitSettingRow](#basekitsettingrow) · [BaseKitFormSection](#basekitformsection) · [BaseKitResizeHandle](#basekitresizehandle) · [BaseKitEmptyState](#basekitemptystate) · [BaseKitChoiceCard](#basekitchoicecard) · [BaseKitPending](#basekitpending)
-- [Lists](#lists) — [BaseKitDataTable](#basekitdatatable) · [BaseKitStatTile](#basekitstattile)
+- [Lists](#lists) — [BaseKitDataTable](#basekitdatatable) · [BaseKitStatTile](#basekitstattile) · [BaseKitCheckButton](#basekitcheckbutton) · [BaseKitStrike](#basekitstrike) · [BaseKitCollapse](#basekitcollapse)
 - [Pickers](#pickers) — [BaseKitRecordPicker](#basekitrecordpicker) · [BaseKitIconPicker](#basekiticonpicker) · [BaseKitFileUpload](#basekitfileupload)
 - [Navigation](#navigation) — [BaseKitBackLink](#basekitbacklink) · [BaseKitViewLink](#basekitviewlink) · [BaseKitTabBar](#basekittabbar) · [BaseKitPullToRefresh](#basekitpulltorefresh)
 - [Confirmation](#confirmation) — [BaseKitConfirmModal](#basekitconfirmmodal)
@@ -251,6 +251,77 @@ red-green deficiency.
 
 ```vue
 <BaseKitStatTile label="Broken links" :value="3" tone="alert" icon="i-lucide-unlink" />
+```
+
+### BaseKitCheckButton
+
+The round tick at the front of a list row: shopping lists, task lists,
+anything that gets ticked off with one thumb. The target is 44 px square, the
+circle inside stays at 28. When it turns checked, the circle gives once and a
+ring runs off it, so the tap reads as landed. That plays on every change to
+checked — also one arriving over a socket — but never on the first render.
+
+It keeps no state. Bind `checked` to the record, or pair it with
+`useDelayedCheck()` below. The fill is `--basekit-check`, by default the
+Nuxt UI `success` colour.
+
+```vue
+<BaseKitCheckButton :checked="!!task.done_at" @toggle="toggleDone(task)" />
+```
+
+### BaseKitStrike
+
+Strikes its text through with a line drawn from the left, line by line on a
+title that wraps. Rendered active from the start it is simply struck, so it
+replaces `line-through` for rows done yesterday as well.
+
+```vue
+<BaseKitStrike :active="!!item.bought_at">{{ item.title }}</BaseKitStrike>
+```
+
+### BaseKitCollapse
+
+Folds its content to nothing over a grid row (`1fr` → `0fr`), without
+measuring anything in script. Padding and borders of the element around it
+stay, so the row's padding belongs inside.
+
+```vue
+<BaseKitCollapse :open="!check.isLeaving(item.id)">…</BaseKitCollapse>
+```
+
+### useDelayedCheck()
+
+On a phone the finger hides what it hits. A box that flips and a row that
+vanishes in the same frame leave open whether the tap hit the right line.
+This runs the steps one after another and sends the request only at the end:
+
+```
+tap ─► checked ─► struck ─► leaving ─► gone + commit()
+0 ms              350 ms    1000 ms    1350 ms
+```
+
+A second tap before `gone` takes it all back — nothing has reached the server
+yet. `commit` should return the promise of the request and the reload after it.
+When it settles the step is dropped: the item has left the list, or the server
+said no and the row comes back. Without a promise, `restoreAfter` (6 s) is the
+fallback. All times are options; `haptic` buzzes once on Android.
+
+```vue
+<script setup lang="ts">
+const check = useDelayedCheck<number>()
+</script>
+
+<template>
+  <li v-for="item in items" v-show="!check.isGone(item.id)" :key="item.id">
+    <BaseKitCollapse :open="!check.isLeaving(item.id)">
+      <BaseKitCheckButton
+        :checked="!!item.done_at || check.isChecked(item.id)"
+        @toggle="item.done_at ? reopen(item) : check.toggle(item.id, () => markDone(item))"
+      />
+      <BaseKitStrike :active="!!item.done_at || check.isStruck(item.id)">{{ item.title }}</BaseKitStrike>
+    </BaseKitCollapse>
+  </li>
+</template>
 ```
 
 ---

@@ -26,6 +26,9 @@
   --basekit-accent-text: #ffffff;
   --basekit-chrome: #0b2239;
   --basekit-chrome-text: rgb(255 255 255 / 82%);
+  /* BaseKitCheckButton: the fill once ticked, and the tick on it. */
+  --basekit-check: var(--ui-success, #16a34a);
+  --basekit-check-text: #ffffff;
 }
 
 .dark {
