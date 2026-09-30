@@ -12,7 +12,7 @@ it is the right choice, and when it is not. What follows is the short version.
 - [Pickers](#pickers) — [BaseKitRecordPicker](#basekitrecordpicker) · [BaseKitIconPicker](#basekiticonpicker) · [BaseKitFileUpload](#basekitfileupload)
 - [Navigation](#navigation) — [BaseKitBackLink](#basekitbacklink) · [BaseKitViewLink](#basekitviewlink) · [BaseKitScopeBreadcrumb](#basekitscopebreadcrumb) · [BaseKitTabBar](#basekittabbar) · [BaseKitPullToRefresh](#basekitpulltorefresh)
 - [Confirmation](#confirmation) — [BaseKitConfirmModal](#basekitconfirmmodal)
-- [Text](#text) — [BaseKitMarkdownEditor](#basekitmarkdowneditor)
+- [Text](#text) — [BaseKitMarkdownEditor](#basekitmarkdowneditor) · [BaseKitTextDiff](#basekittextdiff)
 - [Charts](#charts) — [BaseKitChartFigure](#basekitchartfigure) · [BaseKitChartBars](#basekitchartbars) · [BaseKitChartColumns](#basekitchartcolumns) · [BaseKitChartDonut](#basekitchartdonut) · [BaseKitChartMeter](#basekitchartmeter)
 
 ---
@@ -590,6 +590,18 @@ editor is created `onMounted` because ProseMirror needs a DOM — SSR-safe.
 
 ```vue
 <BaseKitMarkdownEditor v-model="body" />
+```
+
+### BaseKitTextDiff
+
+Shows how a text changed, word by word, in one flow: removed words struck
+through, added words marked, line breaks kept. `<del>` and `<ins>` carry the
+meaning, so a screen reader announces the changes without a legend. The
+comparison lives in `app/utils/word-diff.ts` (`wordDiff`) for callers that
+need the parts themselves.
+
+```vue
+<BaseKitTextDiff :before="snapshot.title" :after="current.title" />
 ```
 
 ---
