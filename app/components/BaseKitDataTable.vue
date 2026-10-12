@@ -307,7 +307,7 @@ function sortIcon(col: BaseKitDataColumn): string | null {
     <table v-else class="w-full text-sm">
       <thead class="border-b border-neutral-200 text-left text-muted dark:border-neutral-800">
         <tr>
-          <th v-if="selectable" class="w-8 py-2">
+          <th v-if="selectable" class="w-8 px-3 py-2">
             <UCheckbox
               :model-value="allShownSelected"
               :indeterminate="someShownSelected"
@@ -318,7 +318,7 @@ function sortIcon(col: BaseKitDataColumn): string | null {
           <th
             v-for="col in columns"
             :key="col.key"
-            class="py-2 font-medium"
+            class="px-3 py-2 font-medium"
             :class="[col.align === 'right' ? 'text-right' : '', col.class]"
             :aria-sort="col.sortable ? (sortKey === col.key ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'none') : undefined"
           >
@@ -336,7 +336,7 @@ function sortIcon(col: BaseKitDataColumn): string | null {
               {{ col.label }}
             </span>
           </th>
-          <th v-if="hasActions" class="py-2 text-right font-medium" />
+          <th v-if="hasActions" class="px-3 py-2 text-right font-medium" />
         </tr>
       </thead>
       <tbody class="divide-y divide-neutral-100 dark:divide-neutral-800">
@@ -346,7 +346,7 @@ function sortIcon(col: BaseKitDataColumn): string | null {
           class="hover:bg-neutral-50 dark:hover:bg-neutral-900/50"
           :class="selectable && isSelected(row) ? 'bg-primary-50/60 dark:bg-primary-950/30' : ''"
         >
-          <td v-if="selectable" class="w-8 py-2">
+          <td v-if="selectable" class="w-8 px-3 py-2">
             <UCheckbox
               :model-value="isSelected(row)"
               :aria-label="labels.selectRow"
@@ -356,7 +356,7 @@ function sortIcon(col: BaseKitDataColumn): string | null {
           <td
             v-for="col in columns"
             :key="col.key"
-            class="py-2"
+            class="px-3 py-2"
             :class="[col.align === 'right' ? 'text-right' : '', col.class]"
           >
             <component
@@ -369,7 +369,7 @@ function sortIcon(col: BaseKitDataColumn): string | null {
               </slot>
             </component>
           </td>
-          <td v-if="hasActions" class="py-2 text-right">
+          <td v-if="hasActions" class="px-3 py-2 text-right">
             <div class="flex justify-end gap-2">
               <slot name="actions" :row="row" />
             </div>

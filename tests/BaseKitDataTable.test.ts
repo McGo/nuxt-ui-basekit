@@ -173,4 +173,12 @@ describe('BaseKitDataTable', () => {
     expect(w.findAll('a')).toHaveLength(0)
     expect(w.text()).toContain('Beta')
   })
+  // Without horizontal padding, adjacent headers ran into each other
+  // ("EntwurfIn Bearbeitung") and the hover background ended at the text.
+  it('pads header and body cells horizontally', () => {
+    const w = render()
+    for (const cell of [...w.findAll('th'), ...w.findAll('tbody td')]) {
+      expect(cell.classes()).toContain('px-3')
+    }
+  })
 })
