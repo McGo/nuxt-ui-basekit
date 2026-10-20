@@ -202,4 +202,11 @@ describe('BaseKitDataTable', () => {
     expect(render().find('[data-test="table-frame"]').classes()).not.toContain('overflow-x-auto')
     expect(render({ scrollable: true }).find('[data-test="table-frame"]').classes()).toContain('overflow-x-auto')
   })
+
+  // In a grid or flex parent the table otherwise widens the parent to its own
+  // width, past the container, and the frame never scrolls.
+  it('lets a scrollable table shrink inside a grid or flex parent', () => {
+    expect(render().classes()).not.toContain('min-w-0')
+    expect(render({ scrollable: true }).classes()).toContain('min-w-0')
+  })
 })

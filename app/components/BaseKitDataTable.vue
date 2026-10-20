@@ -278,7 +278,12 @@ function sortIcon(col: BaseKitDataColumn): string | null {
 </script>
 
 <template>
-  <div class="space-y-4">
+  <div class="space-y-4" :class="scrollable ? 'min-w-0' : undefined">
+    <!--
+      min-w-0 while scrollable: in a grid or flex parent an item is as wide as
+      its content at the least, so the table would push the parent past its
+      container and the frame below would never have anything to scroll.
+    -->
     <!-- Toolbar: search on the left, filters and create on the right -->
     <div v-if="searchable || $slots.toolbar || createLabel" class="flex flex-wrap items-center justify-between gap-3">
       <UInput
