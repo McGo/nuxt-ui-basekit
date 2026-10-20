@@ -18,6 +18,9 @@ import { NuxtLink } from '#components'
  * - `create-label` plus `@create` renders the button top right.
  * - Pagination is client-side: `page-size` and `page-size-options` (default
  *   25, offering 10/25/50/100/250/all).
+ * - `hide-below` on a column hides it under a breakpoint, header and cells
+ *   alike. `scrollable` lets the table scroll sideways instead of squeezing
+ *   its columns into the container.
  *
  * Generic over the row type `T` — slots hand `row` back typed.
  */
@@ -27,7 +30,12 @@ export interface BaseKitDataColumn {
   sortable?: boolean
   align?: 'left' | 'right'
   class?: string
+  /** Hides the column below this breakpoint. Without it, always shown. */
+  hideBelow?: BaseKitBreakpoint
 }
+
+/** The Tailwind breakpoints a column can be hidden below. */
+export type BaseKitBreakpoint = 'sm' | 'md' | 'lg' | 'xl' | '2xl'
 
 /** Page size: a fixed number of rows, or `'all'` for no limit. */
 export type BaseKitPageSize = number | 'all'
@@ -66,6 +74,12 @@ const props = withDefaults(defineProps<{
   selectable?: boolean
   /** The selected row keys (v-model:selected). */
   selected?: Array<string | number>
+  /**
+   * Scrolls sideways once the columns no longer fit, instead of wrapping
+   * them ever narrower. Off by default: a table whose last columns sit out
+   * of sight hides them from people who do not know to scroll.
+   */
+  scrollable?: boolean
 }>(), {
   rowKey: 'id',
   searchable: true,
@@ -74,6 +88,7 @@ const props = withDefaults(defineProps<{
   pageSizeOptions: () => [10, 25, 50, 100, 250, 'all'],
   selectable: false,
   selected: () => [],
+  scrollable: false,
 })
 
 const emit = defineEmits<{ create: [], 'update:selected': [value: Array<string | number>] }>()
@@ -135,6 +150,26 @@ function toggleAllShown(): void {
 
 function clearSelection(): void {
   emit('update:selected', [])
+}
+
+// — Responsive columns -----------------------------------------------------
+
+// Spelled out in full: Tailwind finds classes by reading the source, and a
+// class assembled at runtime never makes it into the stylesheet.
+const hideBelowClasses: Record<BaseKitBreakpoint, string> = {
+  'sm': 'hidden sm:table-cell',
+  'md': 'hidden md:table-cell',
+  'lg': 'hidden lg:table-cell',
+  'xl': 'hidden xl:table-cell',
+  '2xl': 'hidden 2xl:table-cell',
+}
+
+function columnClass(col: BaseKitDataColumn): Array<string | undefined> {
+  return [
+    col.align === 'right' ? 'text-right' : undefined,
+    col.hideBelow ? hideBelowClasses[col.hideBelow] : undefined,
+    col.class,
+  ]
 }
 
 const search = ref('')
@@ -304,79 +339,85 @@ function sortIcon(col: BaseKitDataColumn): string | null {
     </div>
 
     <!-- Table -->
-    <table v-else class="w-full text-sm">
-      <thead class="border-b border-neutral-200 text-left text-muted dark:border-neutral-800">
-        <tr>
-          <th v-if="selectable" class="w-8 px-3 py-2">
-            <UCheckbox
-              :model-value="allShownSelected"
-              :indeterminate="someShownSelected"
-              :aria-label="labels.selectAllShown"
-              @update:model-value="toggleAllShown"
-            />
-          </th>
-          <th
-            v-for="col in columns"
-            :key="col.key"
-            class="px-3 py-2 font-medium"
-            :class="[col.align === 'right' ? 'text-right' : '', col.class]"
-            :aria-sort="col.sortable ? (sortKey === col.key ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'none') : undefined"
-          >
-            <button
-              v-if="col.sortable"
-              type="button"
-              class="inline-flex cursor-pointer select-none items-center gap-1"
-              :class="col.align === 'right' ? 'justify-end' : ''"
-              @click="toggleSort(col)"
+    <div
+      v-else
+      :class="scrollable ? 'overflow-x-auto' : undefined"
+      data-test="table-frame"
+    >
+      <table class="w-full text-sm">
+        <thead class="border-b border-neutral-200 text-left text-muted dark:border-neutral-800">
+          <tr>
+            <th v-if="selectable" class="w-8 px-3 py-2">
+              <UCheckbox
+                :model-value="allShownSelected"
+                :indeterminate="someShownSelected"
+                :aria-label="labels.selectAllShown"
+                @update:model-value="toggleAllShown"
+              />
+            </th>
+            <th
+              v-for="col in columns"
+              :key="col.key"
+              class="px-3 py-2 font-medium"
+              :class="columnClass(col)"
+              :aria-sort="col.sortable ? (sortKey === col.key ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'none') : undefined"
             >
-              {{ col.label }}
-              <UIcon v-if="sortIcon(col)" :name="sortIcon(col)!" class="size-3.5" />
-            </button>
-            <span v-else class="inline-flex items-center gap-1" :class="col.align === 'right' ? 'justify-end' : ''">
-              {{ col.label }}
-            </span>
-          </th>
-          <th v-if="hasActions" class="px-3 py-2 text-right font-medium" />
-        </tr>
-      </thead>
-      <tbody class="divide-y divide-neutral-100 dark:divide-neutral-800">
-        <tr
-          v-for="row in paged"
-          :key="String(cell(row, rowKey))"
-          class="hover:bg-neutral-50 dark:hover:bg-neutral-900/50"
-          :class="selectable && isSelected(row) ? 'bg-primary-50/60 dark:bg-primary-950/30' : ''"
-        >
-          <td v-if="selectable" class="w-8 px-3 py-2">
-            <UCheckbox
-              :model-value="isSelected(row)"
-              :aria-label="labels.selectRow"
-              @update:model-value="toggleRow(row)"
-            />
-          </td>
-          <td
-            v-for="col in columns"
-            :key="col.key"
-            class="px-3 py-2"
-            :class="[col.align === 'right' ? 'text-right' : '', col.class]"
+              <button
+                v-if="col.sortable"
+                type="button"
+                class="inline-flex cursor-pointer select-none items-center gap-1"
+                :class="col.align === 'right' ? 'justify-end' : ''"
+                @click="toggleSort(col)"
+              >
+                {{ col.label }}
+                <UIcon v-if="sortIcon(col)" :name="sortIcon(col)!" class="size-3.5" />
+              </button>
+              <span v-else class="inline-flex items-center gap-1" :class="col.align === 'right' ? 'justify-end' : ''">
+                {{ col.label }}
+              </span>
+            </th>
+            <th v-if="hasActions" class="px-3 py-2 text-right font-medium" />
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-neutral-100 dark:divide-neutral-800">
+          <tr
+            v-for="row in paged"
+            :key="String(cell(row, rowKey))"
+            class="hover:bg-neutral-50 dark:hover:bg-neutral-900/50"
+            :class="selectable && isSelected(row) ? 'bg-primary-50/60 dark:bg-primary-950/30' : ''"
           >
-            <component
-              :is="rowTarget(row, col.key) ? NuxtLink : 'span'"
-              :to="rowTarget(row, col.key) ?? undefined"
-              :class="rowTarget(row, col.key) ? 'font-medium hover:text-primary-700 dark:hover:text-primary-300' : undefined"
+            <td v-if="selectable" class="w-8 px-3 py-2">
+              <UCheckbox
+                :model-value="isSelected(row)"
+                :aria-label="labels.selectRow"
+                @update:model-value="toggleRow(row)"
+              />
+            </td>
+            <td
+              v-for="col in columns"
+              :key="col.key"
+              class="px-3 py-2"
+              :class="columnClass(col)"
             >
-              <slot :name="`cell-${col.key}`" :row="row" :value="cell(row, col.key)">
-                {{ cell(row, col.key) ?? '—' }}
-              </slot>
-            </component>
-          </td>
-          <td v-if="hasActions" class="px-3 py-2 text-right">
-            <div class="flex justify-end gap-2">
-              <slot name="actions" :row="row" />
-            </div>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+              <component
+                :is="rowTarget(row, col.key) ? NuxtLink : 'span'"
+                :to="rowTarget(row, col.key) ?? undefined"
+                :class="rowTarget(row, col.key) ? 'font-medium hover:text-primary-700 dark:hover:text-primary-300' : undefined"
+              >
+                <slot :name="`cell-${col.key}`" :row="row" :value="cell(row, col.key)">
+                  {{ cell(row, col.key) ?? '—' }}
+                </slot>
+              </component>
+            </td>
+            <td v-if="hasActions" class="px-3 py-2 text-right">
+              <div class="flex justify-end gap-2">
+                <slot name="actions" :row="row" />
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
     <!-- Footer: page size on the left, range and paging on the right -->
     <div

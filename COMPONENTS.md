@@ -276,6 +276,25 @@ none. Generic over the row type `T`, so slots hand `row` back typed.
 />
 ```
 
+Narrow screens: `hideBelow` on a column (`sm`, `md`, `lg`, `xl`, `2xl`) hides
+it below that breakpoint, header and cells together. `scrollable` lets the
+whole table scroll sideways once its columns stop fitting. It is off by
+default, because columns out of sight are columns nobody reads unless they
+know to scroll. The two combine: drop the less important columns on a tablet,
+scroll the rest on a phone.
+
+```vue
+<BaseKitDataTable
+  scrollable
+  :columns="[
+    { key: 'email', label: 'Account', sortable: true },
+    { key: 'created_at', label: 'Since', hideBelow: 'md' },
+    { key: 'last_seen_at', label: 'Last seen', hideBelow: 'lg', class: 'whitespace-nowrap' },
+  ]"
+  :rows="users"
+/>
+```
+
 ### BaseKitStatTile
 
 A number with a label — the right shape for a single value.

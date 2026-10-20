@@ -181,4 +181,25 @@ describe('BaseKitDataTable', () => {
       expect(cell.classes()).toContain('px-3')
     }
   })
+
+  it('hides a column below its breakpoint, header and cells alike', () => {
+    const w = render({ columns: [columns[0], { ...columns[2], hideBelow: 'md' }] })
+
+    const pathCells = [w.findAll('th')[1]!, ...w.findAll('tbody tr').map(tr => tr.findAll('td')[1]!)]
+    for (const cell of pathCells) {
+      expect(cell.classes()).toEqual(expect.arrayContaining(['hidden', 'md:table-cell']))
+    }
+    expect(w.findAll('th')[0]!.classes()).not.toContain('hidden')
+  })
+
+  it('keeps the column class next to the breakpoint', () => {
+    const w = render({ columns: [{ ...columns[1], align: 'right', hideBelow: 'lg', class: 'whitespace-nowrap' }] })
+
+    expect(w.find('th').classes()).toEqual(expect.arrayContaining(['text-right', 'hidden', 'lg:table-cell', 'whitespace-nowrap']))
+  })
+
+  it('scrolls sideways only when scrollable is set', () => {
+    expect(render().find('[data-test="table-frame"]').classes()).not.toContain('overflow-x-auto')
+    expect(render({ scrollable: true }).find('[data-test="table-frame"]').classes()).toContain('overflow-x-auto')
+  })
 })
